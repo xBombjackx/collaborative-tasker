@@ -1,8 +1,56 @@
 {
-    "testMessage": {
-        "type": "button",
-        "label": "Test message",
-        "value": "Test message",
-        "group": "Tests"
+    "sessionSummary": {
+        "type": "text",
+        "label": "Session Summary",
+        "value": "Today's Goal: Be Productive!",
+        "group": "Streamer Tasks"
+    },
+    "streamerTask1": {
+        "type": "text",
+        "label": "Task 1",
+        "value": "Set up the stream",
+        "group": "Streamer Tasks"
+    },
+    "streamerTask2": {
+        "type": "text",
+        "label": "Task 2",
+        "value": "Code for 2 hours",
+        "group": "Streamer Tasks"
+    },
+    "streamerTask3": {
+        "type": "text",
+        "label": "Task 3",
+        "value": "Review viewer tasks",
+        "group": "Streamer Tasks"
+    },
+    "streamerTask4": {
+        "type": "text",
+        "label": "Task 4",
+        "value": "",
+        "group": "Streamer Tasks"
+    },
+    "streamerTask5": {
+        "type": "text",
+        "label": "Task 5",
+        "value": "",
+        "group": "Streamer Tasks"
+    },
+    "backgroundColor": {
+        "type": "colorpicker",
+        "label": "Background Color",
+        "value": "rgba(30, 30, 30, 0.8)",
+        "group": "Customization"
+    },
+    "textColor": {
+        "type": "colorpicker",
+        "label": "Text Color",
+        "value": "#ffffff",
+        "group": "Customization"
+    },
+    "progressBarColor": {
+        "type": "colorpicker",
+        "label": "Progress Bar Color",
+        "value": "#4caf50",
+        "group": "Customization"
     }
 }

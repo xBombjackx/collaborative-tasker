@@ -21,6 +21,8 @@ if (typeof window.SE_API === "undefined") {
 import * as State from './state.js';
 import * as UI from './ui.js';
 import { handleMessage } from './commands.js';
+import { addAlert, addMessage } from './generated-components.js';
+
 document.addEventListener("DOMContentLoaded", function () {
   // This is the main entry point for the widget.
   // It sets up event listeners and initializes the widget.
@@ -214,16 +216,14 @@ window.CST_API = {
       progressPoints: State.getProgressPoints()
     };
   },
-  emulateMessage: message => {
+  emulateMessage: (message, username = "TestUser", tags = { broadcaster: true }) => {
     const mockEvent = {
       listener: "message",
       event: {
         data: {
           text: message,
-          displayName: "TestUser",
-          tags: {
-            broadcaster: true
-          } // Assume broadcaster for testing
+          displayName: username,
+          tags: tags
         }
       }
     };
@@ -232,24 +232,3 @@ window.CST_API = {
     });
   }
 };
-function addAlert(message, user, messageId) {
-  const elem = document.createElement('div');
-  elem.innerHTML = `
-<div class="alert" id="m${messageId}">
-    <div>${user}</div>
-    <span>${message}</span>
-</div>
-                    `;
-  document.getElementById('main-container').appendChild(elem);
-}
-function addMessage(message, username, messageId, userInfo) {
-  const elem = document.createElement('div');
-  elem.innerHTML = `
-<div class="message" id="m${messageId}">
-    <div>${username}</div>
-    <span>${message}</span>
-</div>
-                    `;
-  document.getElementById('main-container').appendChild(elem);
-  console.log("Successfully appended message to the DOM " + message);
-}

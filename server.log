@@ -1,19 +1,18 @@
-
-> chat-widget-sdk@1.0.0 dev
-> node sdk.js
-
-[19:54:37.795] INFO (4054): Synced all widget JS/CSS files to .sdk
-[19:54:37.816] INFO (4054): Server is running on port 3000
-[19:54:37.829] INFO (4054): [+] /app/widget/commands.js
-[19:54:37.830] INFO (4054): [+] /app/widget/data.json
-[19:54:37.830] INFO (4054): [+] /app/widget/fields.json
-[19:54:37.830] INFO (4054): [+] /app/widget/state.js
-[19:54:37.831] INFO (4054): [+] /app/widget/ui.js
-[19:54:37.831] INFO (4054): [+] /app/widget/widget.css
-[19:54:37.832] INFO (4054): [+] /app/widget/widget.html
-[19:54:37.833] INFO (4054): [+] /app/widget/widget.js
-[19:54:37.834] INFO (4054): [+] /app/svg/.gitkeep
-[19:54:37.834] INFO (4054): [+] /app/components/alert.html
-[19:54:37.885] INFO (4054): [+] /app/components/message.html
-[19:54:37.954] INFO (4054): [~] /app/widget/widget.js
-[19:54:37.958] INFO (4054): [~] /app/widget/widget.css
+[21:20:54.928] INFO (3924): Synced all widget JS/CSS files to .sdk
+[21:20:54.943] INFO (3924): Server is running on port 3000
+[21:20:54.959] INFO (3924): [+] /app/widget/commands.js
+[21:20:54.960] INFO (3924): [+] /app/widget/data.json
+[21:20:54.960] INFO (3924): [+] /app/widget/fields.json
+[21:20:54.960] INFO (3924): [+] /app/widget/generated-components.js
+[21:20:54.961] INFO (3924): [+] /app/widget/state.js
+[21:20:54.962] INFO (3924): [+] /app/widget/ui.js
+[21:20:54.963] INFO (3924): [+] /app/widget/widget.css
+[21:20:54.964] INFO (3924): [+] /app/widget/widget.html
+[21:20:54.964] INFO (3924): [+] /app/widget/widget.js
+[21:20:54.966] INFO (3924): [+] /app/svg/.gitkeep
+[21:20:54.967] INFO (3924): [+] /app/components/alert.html
+[21:20:54.967] INFO (3924): [+] /app/components/message.html
+[21:20:55.073] INFO (3924): Successfully generated components into generated-components.js
+[21:20:55.091] INFO (3924): Successfully generated components into generated-components.js
+[21:20:55.094] INFO (3924): [~] /app/widget/generated-components.js
+[21:20:55.198] INFO (3924): [~] /app/widget/widget.css

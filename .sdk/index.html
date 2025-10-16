@@ -187,134 +187,199 @@
     </div>
 
     <div class="control-group">
+        <h2>Command Emulator</h2>
+        <div class="form-grid">
+            <input type="text" id="command-username-input" placeholder="Username" value="TestUser">
+            <select id="command-role-select">
+                <option value="viewer">Viewer</option>
+                <option value="mod">Moderator</option>
+                <option value="broadcaster">Broadcaster</option>
+            </select>
+            <input type="text" id="command-input" placeholder="Enter command (e.g., !task My new task)" class="full-width">
+            <button id="emulate-command-button" class="full-width">Emulate Command</button>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <h2>Command Guide</h2>
+        <div id="command-guide">
+            <p><strong>Viewer Commands:</strong></p>
+            <ul>
+                <li><code>!task [description]</code> - Submit a task for approval.</li>
+                <li><code>!status [complete|pause|resume]</code> - Update your task status.</li>
+                <li><code>!help</code> - Shows this guide.</li>
+            </ul>
+            <p><strong>Moderator/Streamer Commands:</strong></p>
+            <ul>
+                <li><code>!approve [username]</code> - Approve a pending task.</li>
+                <li><code>!reject [username]</code> - Reject a pending task.</li>
+                <li><code>!status [complete|pause|resume] [username]</code> - Update a user's task.</li>
+                <li><code>!addtask [list_name] [description]</code> - Add a task to a streamer list.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="control-group">
         <h2>Widget State</h2>
         <button id="show-widget-state-button" class="full-width">Get and Show Widget State</button>
         <pre id="widget-state-display"></pre>
     </div>
-
 </div>
 
 <script>
     const iframe = document.getElementById('widget-iframe');
     let widgetWindow;
 
+    const getEl = (id) => document.getElementById(id);
+
     iframe.onload = () => {
         widgetWindow = iframe.contentWindow;
         console.log("Widget Iframe Loaded.");
         setInterval(refreshUiState, 1000);
-
-        // Set up event listeners for the control buttons
-        document.getElementById('add-list-button').addEventListener('click', addList);
-        document.getElementById('delete-list-button').addEventListener('click', deleteList);
-        document.getElementById('add-task-button').addEventListener('click', addTask);
-        document.getElementById('add-pending-task-button').addEventListener('click', addPending);
-        document.getElementById('set-points-button').addEventListener('click', setPoints);
-        document.getElementById('show-widget-state-button').addEventListener('click', showWidgetState);
+        setupEventListeners();
     };
 
+    function setupEventListeners() {
+        getEl('add-list-button').addEventListener('click', addList);
+        getEl('delete-list-button').addEventListener('click', deleteList);
+        getEl('add-task-button').addEventListener('click', addTask);
+        getEl('add-pending-task-button').addEventListener('click', addPending);
+        getEl('set-points-button').addEventListener('click', setPoints);
+        getEl('show-widget-state-button').addEventListener('click', showWidgetState);
+        getEl('emulate-command-button').addEventListener('click', () => emulateCommand());
+
+        // Use event delegation for dynamically created buttons
+        getEl('pending-tasks-list').addEventListener('click', handlePendingListClick);
+        getEl('task-management-list').addEventListener('click', handleManagementListClick);
+    }
+
     function getRoleTags(role) {
-        const tags = { mod: false, broadcaster: false };
-        if (role === 'mod') tags.mod = true;
-        if (role === 'broadcaster') tags.broadcaster = true;
-        return tags;
+        return { mod: role === 'mod', broadcaster: role === 'broadcaster' };
     }
 
     function emulateCommand(commandOverride) {
-        const username = document.getElementById('username-input').value;
-        const command = commandOverride || document.getElementById('command-input').value;
-        const role = document.getElementById('user-role-select').value;
+        const username = getEl('command-username-input').value;
+        const command = commandOverride || getEl('command-input').value;
+        const role = getEl('command-role-select').value;
 
         if (!username || !command) {
-            alert("Username and command are required.");
+            alert("Username and command text are required.");
             return;
         }
 
-        const event = {
-            listener: 'message',
-            event: {
-                data: { text: command, displayName: username, tags: getRoleTags(role) }
-            }
-        };
-        widgetWindow.postMessage({ type: 'event:received', detail: event }, '*');
+        if (widgetWindow.CST_API && typeof widgetWindow.CST_API.emulateMessage === 'function') {
+            widgetWindow.CST_API.emulateMessage(command, username, getRoleTags(role));
+        }
+        if(!commandOverride) {
+            getEl('command-input').value = '';
+        }
     }
 
     function addList() {
-        const listName = document.getElementById('list-name-input').value;
-        if (listName && widgetWindow.CST_API && typeof widgetWindow.CST_API.addList === 'function') {
-            widgetWindow.CST_API.addList(listName);
-            document.getElementById('list-name-input').value = '';
+        const input = getEl('list-name-input');
+        if (input.value && widgetWindow.CST_API?.addList) {
+            widgetWindow.CST_API.addList(input.value);
+            input.value = '';
         }
     }
 
     function deleteList() {
-        const listName = document.getElementById('delete-list-select').value;
-        if (listName && confirm(`Are you sure you want to delete the list "${listName}"?`)) {
-           if(widgetWindow.CST_API && typeof widgetWindow.CST_API.deleteList === 'function') widgetWindow.CST_API.deleteList(listName);
+        const select = getEl('delete-list-select');
+        if (select.value && confirm(`Are you sure you want to delete the list "${select.value}"?`)) {
+            widgetWindow.CST_API?.deleteList(select.value);
         }
     }
 
     function addTask() {
-        const listName = document.getElementById('task-list-select').value;
-        const taskText = document.getElementById('task-text-input').value;
+        const listName = getEl('task-list-select').value;
+        const taskText = getEl('task-text-input');
         if (!listName) {
             alert("Please select a list to add a task to.");
             return;
         }
-        if (taskText && widgetWindow.CST_API && typeof widgetWindow.CST_API.addTaskToList === 'function') {
-            widgetWindow.CST_API.addTaskToList(listName, taskText);
-            document.getElementById('task-text-input').value = '';
+        if (taskText.value && widgetWindow.CST_API?.addTaskToList) {
+            widgetWindow.CST_API.addTaskToList(listName, taskText.value);
+            taskText.value = '';
         }
     }
 
     function setPoints() {
-        const points = parseInt(document.getElementById('progress-points-input').value, 10);
-        if (!isNaN(points) && widgetWindow.CST_API && typeof widgetWindow.CST_API.setProgressPoints === 'function') {
+        const points = parseInt(getEl('progress-points-input').value, 10);
+        if (!isNaN(points) && widgetWindow.CST_API?.setProgressPoints) {
             widgetWindow.CST_API.setProgressPoints(points);
         }
     }
 
     function addPending() {
-        const username = document.getElementById('pending-user-input').value;
-        const task = document.getElementById('pending-task-input').value;
-        if(username && task && widgetWindow.CST_API && typeof widgetWindow.CST_API.addPendingTaskForTest === 'function') {
-            widgetWindow.CST_API.addPendingTaskForTest(username, task);
-            document.getElementById('pending-task-input').value = '';
+        const username = getEl('pending-user-input').value;
+        const task = getEl('pending-task-input');
+        if (username && task.value && widgetWindow.CST_API?.addPendingTaskForTest) {
+            widgetWindow.CST_API.addPendingTaskForTest(username, task.value);
+            task.value = '';
         }
     }
 
     function showWidgetState() {
-        if (!widgetWindow.CST_API || typeof widgetWindow.CST_API.getWidgetState !== 'function') return;
-        const state = widgetWindow.CST_API.getWidgetState();
-        document.getElementById('widget-state-display').textContent = JSON.stringify(state, null, 2);
+        const state = widgetWindow.CST_API?.getWidgetState();
+        if (state) {
+            getEl('widget-state-display').textContent = JSON.stringify(state, null, 2);
+        }
+    }
+
+    function handlePendingListClick(event) {
+        const button = event.target.closest('button');
+        if (!button) return;
+        const command = button.dataset.command;
+        if (command) {
+            emulateCommand(command);
+        }
+    }
+
+    function handleManagementListClick(event) {
+        const button = event.target.closest('button');
+        if (!button) return;
+        const { listName, taskIndex, action } = button.dataset;
+
+        if (action === 'complete' && widgetWindow.CST_API?.completeTaskInList) {
+            widgetWindow.CST_API.completeTaskInList(listName, parseInt(taskIndex));
+        } else if (action === 'delete' && widgetWindow.CST_API?.deleteTaskFromList) {
+            widgetWindow.CST_API.deleteTaskFromList(listName, parseInt(taskIndex));
+        }
+    }
+
+    function createButton(text, command, isDanger = false) {
+        const button = document.createElement('button');
+        button.textContent = text;
+        button.dataset.command = command;
+        if(isDanger) button.classList.add('danger');
+        return button;
     }
 
     function refreshUiState() {
-        if (!widgetWindow.CST_API || typeof widgetWindow.CST_API.getWidgetState !== 'function') return;
-
-        const state = widgetWindow.CST_API.getWidgetState();
+        const state = widgetWindow.CST_API?.getWidgetState();
+        if (!state) return;
 
         // Refresh pending tasks
-        const pendingList = document.getElementById('pending-tasks-list');
+        const pendingList = getEl('pending-tasks-list');
         pendingList.innerHTML = '';
-        if(state.pendingTasks.length === 0) {
+        if (state.pendingTasks.length === 0) {
             pendingList.innerHTML = '<li>No pending tasks.</li>';
         } else {
             state.pendingTasks.forEach(task => {
                 const li = document.createElement('li');
-                li.innerHTML = `
-                    <span><strong>${task.username}</strong>: ${task.task}</span>
-                    <div class="actions">
-                        <button onclick="emulateCommand('!approve ${task.username}')">Approve</button>
-                        <button onclick="emulateCommand('!reject ${task.username}')" class="danger">Reject</button>
-                    </div>
-                `;
+                li.innerHTML = `<span><strong>${task.username}</strong>: ${task.task}</span>`;
+                const actions = document.createElement('div');
+                actions.className = 'actions';
+                actions.appendChild(createButton('Approve', `!approve ${task.username}`));
+                actions.appendChild(createButton('Reject', `!reject ${task.username}`, true));
+                li.appendChild(actions);
                 pendingList.appendChild(li);
             });
         }
 
         // Refresh list dropdowns
-        const deleteListSelect = document.getElementById('delete-list-select');
-        const taskListSelect = document.getElementById('task-list-select');
+        const deleteListSelect = getEl('delete-list-select');
+        const taskListSelect = getEl('task-list-select');
         const currentDeleteVal = deleteListSelect.value;
         const currentTaskVal = taskListSelect.value;
         deleteListSelect.innerHTML = '';
@@ -329,7 +394,7 @@
         taskListSelect.value = currentTaskVal;
 
         // Refresh task management list
-        const taskManagementList = document.getElementById('task-management-list');
+        const taskManagementList = getEl('task-management-list');
         taskManagementList.innerHTML = '';
         const selectedList = taskListSelect.value;
 
@@ -342,13 +407,17 @@
 
                 const completeButton = document.createElement('button');
                 completeButton.textContent = 'Complete';
-                completeButton.onclick = () => widgetWindow.CST_API.completeTaskInList(selectedList, index);
+                completeButton.dataset.action = 'complete';
+                completeButton.dataset.listName = selectedList;
+                completeButton.dataset.taskIndex = index;
                 actions.appendChild(completeButton);
 
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Delete';
                 deleteButton.className = 'danger';
-                deleteButton.onclick = () => widgetWindow.CST_API.deleteTaskFromList(selectedList, index);
+                deleteButton.dataset.action = 'delete';
+                deleteButton.dataset.listName = selectedList;
+                deleteButton.dataset.taskIndex = index;
                 actions.appendChild(deleteButton);
 
                 li.appendChild(actions);
@@ -356,7 +425,6 @@
             });
         }
     }
-
 </script>
 
 </body></html>

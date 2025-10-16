@@ -2,18 +2,18 @@
 > chat-widget-sdk@1.0.0 dev
 > node sdk.js
 
-[09:18:04.225] INFO (2636): Synced all widget JS/CSS files to .sdk
-[09:18:04.234] INFO (2636): Server is running on port 3000
-[09:18:04.245] INFO (2636): [+] /app/widget/commands.js
-[09:18:04.245] INFO (2636): [+] /app/widget/data.json
-[09:18:04.246] INFO (2636): [+] /app/widget/fields.json
-[09:18:04.246] INFO (2636): [+] /app/widget/state.js
-[09:18:04.246] INFO (2636): [+] /app/widget/ui.js
-[09:18:04.246] INFO (2636): [+] /app/widget/widget.css
-[09:18:04.248] INFO (2636): [+] /app/widget/widget.html
-[09:18:04.249] INFO (2636): [+] /app/widget/widget.js
-[09:18:04.249] INFO (2636): [+] /app/svg/.gitkeep
-[09:18:04.250] INFO (2636): [+] /app/components/alert.html
-[09:18:04.283] INFO (2636): [+] /app/components/message.html
-[09:18:04.336] INFO (2636): [~] /app/widget/widget.js
-[09:18:04.340] INFO (2636): [~] /app/widget/widget.css
+[19:54:37.795] INFO (4054): Synced all widget JS/CSS files to .sdk
+[19:54:37.816] INFO (4054): Server is running on port 3000
+[19:54:37.829] INFO (4054): [+] /app/widget/commands.js
+[19:54:37.830] INFO (4054): [+] /app/widget/data.json
+[19:54:37.830] INFO (4054): [+] /app/widget/fields.json
+[19:54:37.830] INFO (4054): [+] /app/widget/state.js
+[19:54:37.831] INFO (4054): [+] /app/widget/ui.js
+[19:54:37.831] INFO (4054): [+] /app/widget/widget.css
+[19:54:37.832] INFO (4054): [+] /app/widget/widget.html
+[19:54:37.833] INFO (4054): [+] /app/widget/widget.js
+[19:54:37.834] INFO (4054): [+] /app/svg/.gitkeep
+[19:54:37.834] INFO (4054): [+] /app/components/alert.html
+[19:54:37.885] INFO (4054): [+] /app/components/message.html
+[19:54:37.954] INFO (4054): [~] /app/widget/widget.js
+[19:54:37.958] INFO (4054): [~] /app/widget/widget.css

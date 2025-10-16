@@ -22,15 +22,26 @@ const logger = pino({
     },
 })
 
-// Copy widget files to .sdk directory
-fs.copyFileSync(
-    path.join(__dirname, "widget", "widget.js"),
-    path.join(__dirname, ".sdk", "widget.js")
-)
-fs.copyFileSync(
-    path.join(__dirname, "widget", "widget.css"),
-    path.join(__dirname, ".sdk", "widget.css")
-)
+// Function to copy all widget JS/CSS files to .sdk
+function syncAllWidgetFiles() {
+    const widgetDir = path.join(__dirname, "widget");
+    const sdkDir = path.join(__dirname, ".sdk");
+    try {
+        const files = fs.readdirSync(widgetDir);
+        files.forEach(file => {
+            if (file.endsWith('.js') || file.endsWith('.css')) {
+                fs.copyFileSync(path.join(widgetDir, file), path.join(sdkDir, file));
+            }
+        });
+        logger.info("Synced all widget JS/CSS files to .sdk");
+    } catch (err) {
+        logger.error("Error syncing widget files:", err);
+    }
+}
+
+// Initial sync of all files
+syncAllWidgetFiles();
+
 
 var watcher = chokidar.watch(path.join(__dirname, "widget"), {
     ignored: /^\./,
@@ -54,16 +65,22 @@ app.get("/", function (req, res) {
 })
 
 watcher
-    .on("add", function (path) {
-        logger.info(`[+] ${path}`)
-        if (path.includes("widget.html")) {
-            widgetToIndex()
+    .on("add", function (filePath) {
+        logger.info(`[+] ${filePath}`);
+        const fileName = path.basename(filePath);
+        if (filePath.includes("widget.html")) {
+            widgetToIndex();
+        } else if (fileName.endsWith('.js') || fileName.endsWith('.css')) {
+            fs.copyFileSync(filePath, path.join(__dirname, ".sdk", fileName));
         }
     })
-    .on("change", function (path) {
-        logger.info(`[~] ${path}`)
-        if (path.includes("widget.html")) {
-            widgetToIndex()
+    .on("change", function (filePath) {
+        logger.info(`[~] ${filePath}`);
+        const fileName = path.basename(filePath);
+        if (filePath.includes("widget.html")) {
+            widgetToIndex();
+        } else if (fileName.endsWith('.js') || fileName.endsWith('.css')) {
+            fs.copyFileSync(filePath, path.join(__dirname, ".sdk", fileName));
         }
     })
     .on("unlink", function (path) {

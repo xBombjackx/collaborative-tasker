@@ -331,6 +331,8 @@
         if (!button) return;
         const command = button.dataset.command;
         if (command) {
+            // Ensure moderator role is selected for approve/reject actions
+            getEl('command-role-select').value = 'mod';
             emulateCommand(command);
         }
     }

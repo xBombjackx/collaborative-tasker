@@ -44,3 +44,7 @@ This document outlines the necessary improvements, bug fixes, and future feature
     -   Begin planning for the Phase 2 feature of allowing viewers to use channel points to bypass the moderation queue.
 -   [ ] **Persistence & Reset Logic:**
     -   Ensure the "persist across stream restarts within the same day/session" feature from `design.md` is fully implemented and robust. Add a manual "reset session" button for the streamer in the config.
+
+##  Test UI Stuff
+-   [ ] **Style the test UI**
+-   [ ] **Make sure test UI has all commands testable and all commands displayed as a guide**

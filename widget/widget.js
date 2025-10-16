@@ -234,18 +234,22 @@ window.CST_API = {
 };
 function addAlert(message, user, messageId) {
   const elem = document.createElement('div');
-  elem.innerHTML = <div class="alert" id="m${messageId}">
+  elem.innerHTML = `
+<div class="alert" id="m${messageId}">
     <div>${user}</div>
     <span>${message}</span>
-  </div>;
+</div>
+                    `;
   document.getElementById('main-container').appendChild(elem);
 }
 function addMessage(message, username, messageId, userInfo) {
   const elem = document.createElement('div');
-  elem.innerHTML = <div class="message" id="m${messageId}">
+  elem.innerHTML = `
+<div class="message" id="m${messageId}">
     <div>${username}</div>
     <span>${message}</span>
-  </div>;
+</div>
+                    `;
   document.getElementById('main-container').appendChild(elem);
   console.log("Successfully appended message to the DOM " + message);
 }

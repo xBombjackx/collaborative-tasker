@@ -317,8 +317,9 @@ function parseComponents() {
                 const functionBody = `function ${formattedFunctionName}(${variables.join(", ")}) {
                     ${beforeScripts.join("\n")} 
                     const elem = document.createElement('div');
-                    elem.innerHTML = 
-${$( "body").html()}
+                    elem.innerHTML = \`
+${$( "body").html().trim()}
+                    \`;
                     document.getElementById('main-container').appendChild(elem);
                     ${afterScrips.join("\n")} 
                     }`

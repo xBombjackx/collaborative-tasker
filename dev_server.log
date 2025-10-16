@@ -1,0 +1,15 @@
+
+> chat-widget-sdk@1.0.0 dev
+> node sdk.js
+
+[03:47:24.253] INFO (2869): Server is running on port 3000
+[03:47:24.269] INFO (2869): [+] /app/widget/data.json
+[03:47:24.269] INFO (2869): [+] /app/widget/fields.json
+[03:47:24.269] INFO (2869): [+] /app/widget/widget.css
+[03:47:24.269] INFO (2869): [+] /app/widget/widget.html
+[03:47:24.270] INFO (2869): [+] /app/widget/widget.js
+[03:47:24.271] INFO (2869): [+] /app/svg/.gitkeep
+[03:47:24.272] INFO (2869): [+] /app/components/alert.html
+[03:47:24.332] INFO (2869): [+] /app/components/message.html
+[03:47:24.441] INFO (2869): [~] /app/widget/widget.js
+[03:47:24.445] INFO (2869): [~] /app/widget/widget.css

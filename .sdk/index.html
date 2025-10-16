@@ -131,7 +131,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/animejs@3.0.1/lib/anime.min.js"></script>
 <link href="widget.css" rel="stylesheet">
-<script src="widget.js"></script>
+<script type="module" src="widget.js"></script>
 
 </head>
 
@@ -148,9 +148,9 @@
         <h2>List Management</h2>
         <div class="form-grid">
             <input type="text" id="list-name-input" placeholder="New List Name" class="full-width">
-            <button onclick="addList()">Add List</button>
+            <button id="add-list-button">Add List</button>
             <select id="delete-list-select" class="full-width" aria-label="Select list to delete"></select>
-            <button onclick="deleteList()" class="danger">Delete Selected List</button>
+            <button id="delete-list-button" class="danger">Delete Selected List</button>
         </div>
     </div>
 
@@ -159,7 +159,7 @@
         <div class="form-grid">
             <select id="task-list-select" class="full-width" aria-label="Select list to manage tasks"></select>
             <input type="text" id="task-text-input" placeholder="New Task Text" class="full-width">
-            <button onclick="addTask()" class="full-width">Add Task to Selected List</button>
+            <button id="add-task-button" class="full-width">Add Task to Selected List</button>
         </div>
         <hr style="margin: 16px 0; border-color: var(--border-color);">
         <h3>Tasks in Selected List</h3>
@@ -171,7 +171,7 @@
         <div class="form-grid">
              <input type="text" id="pending-user-input" placeholder="Username" value="PendingUser">
              <input type="text" id="pending-task-input" placeholder="Task description" class="full-width">
-             <button onclick="addPending()" class="full-width">Add Pending Task</button>
+             <button id="add-pending-task-button" class="full-width">Add Pending Task</button>
         </div>
         <hr style="margin: 16px 0; border-color: var(--border-color);">
         <h3>Pending Tasks</h3>
@@ -182,13 +182,13 @@
         <h2>Other Controls</h2>
         <div class="form-grid">
             <input type="number" id="progress-points-input" placeholder="Total Points" class="full-width">
-            <button onclick="setPoints()" class="full-width">Set Progress Points</button>
+            <button id="set-points-button" class="full-width">Set Progress Points</button>
         </div>
     </div>
 
     <div class="control-group">
         <h2>Widget State</h2>
-        <button onclick="showWidgetState()" class="full-width">Get and Show Widget State</button>
+        <button id="show-widget-state-button" class="full-width">Get and Show Widget State</button>
         <pre id="widget-state-display"></pre>
     </div>
 
@@ -202,6 +202,14 @@
         widgetWindow = iframe.contentWindow;
         console.log("Widget Iframe Loaded.");
         setInterval(refreshUiState, 1000);
+
+        // Set up event listeners for the control buttons
+        document.getElementById('add-list-button').addEventListener('click', addList);
+        document.getElementById('delete-list-button').addEventListener('click', deleteList);
+        document.getElementById('add-task-button').addEventListener('click', addTask);
+        document.getElementById('add-pending-task-button').addEventListener('click', addPending);
+        document.getElementById('set-points-button').addEventListener('click', setPoints);
+        document.getElementById('show-widget-state-button').addEventListener('click', showWidgetState);
     };
 
     function getRoleTags(role) {
@@ -232,8 +240,8 @@
 
     function addList() {
         const listName = document.getElementById('list-name-input').value;
-        if (listName && typeof widgetWindow.addList === 'function') {
-            widgetWindow.addList(listName);
+        if (listName && widgetWindow.CST_API && typeof widgetWindow.CST_API.addList === 'function') {
+            widgetWindow.CST_API.addList(listName);
             document.getElementById('list-name-input').value = '';
         }
     }
@@ -241,7 +249,7 @@
     function deleteList() {
         const listName = document.getElementById('delete-list-select').value;
         if (listName && confirm(`Are you sure you want to delete the list "${listName}"?`)) {
-           if(typeof widgetWindow.deleteList === 'function') widgetWindow.deleteList(listName);
+           if(widgetWindow.CST_API && typeof widgetWindow.CST_API.deleteList === 'function') widgetWindow.CST_API.deleteList(listName);
         }
     }
 
@@ -252,38 +260,38 @@
             alert("Please select a list to add a task to.");
             return;
         }
-        if (taskText && typeof widgetWindow.addTaskToList === 'function') {
-            widgetWindow.addTaskToList(listName, taskText);
+        if (taskText && widgetWindow.CST_API && typeof widgetWindow.CST_API.addTaskToList === 'function') {
+            widgetWindow.CST_API.addTaskToList(listName, taskText);
             document.getElementById('task-text-input').value = '';
         }
     }
 
     function setPoints() {
         const points = parseInt(document.getElementById('progress-points-input').value, 10);
-        if (!isNaN(points) && typeof widgetWindow.setProgressPoints === 'function') {
-            widgetWindow.setProgressPoints(points);
+        if (!isNaN(points) && widgetWindow.CST_API && typeof widgetWindow.CST_API.setProgressPoints === 'function') {
+            widgetWindow.CST_API.setProgressPoints(points);
         }
     }
 
     function addPending() {
         const username = document.getElementById('pending-user-input').value;
         const task = document.getElementById('pending-task-input').value;
-        if(username && task && typeof widgetWindow.addPendingTaskForTest === 'function') {
-            widgetWindow.addPendingTaskForTest(username, task);
+        if(username && task && widgetWindow.CST_API && typeof widgetWindow.CST_API.addPendingTaskForTest === 'function') {
+            widgetWindow.CST_API.addPendingTaskForTest(username, task);
             document.getElementById('pending-task-input').value = '';
         }
     }
 
     function showWidgetState() {
-        if (typeof widgetWindow.getWidgetState !== 'function') return;
-        const state = widgetWindow.getWidgetState();
+        if (!widgetWindow.CST_API || typeof widgetWindow.CST_API.getWidgetState !== 'function') return;
+        const state = widgetWindow.CST_API.getWidgetState();
         document.getElementById('widget-state-display').textContent = JSON.stringify(state, null, 2);
     }
 
     function refreshUiState() {
-        if (typeof widgetWindow.getWidgetState !== 'function') return;
+        if (!widgetWindow.CST_API || typeof widgetWindow.CST_API.getWidgetState !== 'function') return;
 
-        const state = widgetWindow.getWidgetState();
+        const state = widgetWindow.CST_API.getWidgetState();
 
         // Refresh pending tasks
         const pendingList = document.getElementById('pending-tasks-list');
@@ -334,13 +342,13 @@
 
                 const completeButton = document.createElement('button');
                 completeButton.textContent = 'Complete';
-                completeButton.onclick = () => widgetWindow.completeTaskInList(selectedList, index);
+                completeButton.onclick = () => widgetWindow.CST_API.completeTaskInList(selectedList, index);
                 actions.appendChild(completeButton);
 
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Delete';
                 deleteButton.className = 'danger';
-                deleteButton.onclick = () => widgetWindow.deleteTaskFromList(selectedList, index);
+                deleteButton.onclick = () => widgetWindow.CST_API.deleteTaskFromList(selectedList, index);
                 actions.appendChild(deleteButton);
 
                 li.appendChild(actions);

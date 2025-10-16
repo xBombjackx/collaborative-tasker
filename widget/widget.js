@@ -4,13 +4,13 @@ if (typeof SE_API === 'undefined') {
   window.SE_API = {
     store: {
       get: function (key) {
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
           const data = sessionStorage.getItem(key);
           resolve(data ? JSON.parse(data) : null);
         });
       },
       set: function (key, value) {
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
           sessionStorage.setItem(key, JSON.stringify(value));
           resolve();
         });
@@ -24,61 +24,58 @@ if (typeof SE_API === 'undefined') {
 let lists = {};
 let pendingTasks = [];
 let progressPoints = 0;
-let sessionSummary = "";
 
-// Configurable settings
-let config = {
-  tierThresholds: {
-    tier1: 3,
-    tier2: 7,
-    tier3: 12
-  },
-  viewerTaskLimit: 3,
-  offlineThreshold: 5 * 60 * 1000 // 5 minutes
-};
+// Configurable settings from SE Fields
+let config = {};
 window.addEventListener('onWidgetLoad', function (obj) {
   const fieldData = obj.detail.fieldData;
 
-  // Apply fieldData to config
-  sessionSummary = fieldData.sessionSummary || "Session Goals";
-  config.tierThresholds.tier1 = fieldData.tier1Threshold || 3;
-  config.tierThresholds.tier2 = fieldData.tier2Threshold || 7;
-  config.tierThresholds.tier3 = fieldData.tier3Threshold || 12;
-  config.viewerTaskLimit = fieldData.viewerTaskLimit || 3;
+  // --- Configuration Loading ---
+  config = {
+    sessionSummary: fieldData.sessionSummary || "Session Goals",
+    tierThresholds: {
+      tier1: fieldData.tier1Threshold || 3,
+      tier2: fieldData.tier2Threshold || 7,
+      tier3: fieldData.tier3Threshold || 12
+    },
+    viewerTaskLimit: fieldData.viewerTaskLimit || 3,
+    offlineThreshold: 5 * 60 * 1000,
+    // 5 minutes, not currently configurable
+    defaultListName: "Viewers" // The list for legacy !task command
+  };
 
-  // Apply customizations
+  // --- Apply Customizations ---
   const root = document.documentElement;
   root.style.setProperty('--background-color', fieldData.backgroundColor);
   root.style.setProperty('--text-color', fieldData.textColor);
   root.style.setProperty('--progress-bar-color', fieldData.progressBarColor);
 
-  // Load data from StreamElements store
+  // --- Data Loading ---
   SE_API.store.get('cst_data').then(data => {
-    if (data && data.lists) {
+    if (data && data.lists && Object.keys(data.lists).length > 0) {
       lists = data.lists;
       pendingTasks = data.pendingTasks || [];
       progressPoints = data.progressPoints || 0;
     } else {
-      // Initialize with default lists if no data
+      // Initialize with default lists if no data exists
       lists = {
-        "Streamer": {
-          tasks: [],
-          summary: sessionSummary
+        "Stream Goals": {
+          tasks: [{
+            text: "Example Streamer Task 1",
+            completed: false
+          }, {
+            text: "Example Streamer Task 2",
+            completed: false
+          }],
+          summary: config.sessionSummary
         },
         "Viewers": {
           tasks: [],
           limit: config.viewerTaskLimit
         }
       };
-      // Load legacy streamer tasks from config
-      for (let i = 1; i <= 5; i++) {
-        if (fieldData[`streamerTask${i}`]) {
-          lists["Streamer"].tasks.push({
-            text: fieldData[`streamerTask${i}`],
-            completed: false
-          });
-        }
-      }
+      pendingTasks = [];
+      progressPoints = 0;
     }
     renderAllLists();
     updateProgressBar();
@@ -150,11 +147,20 @@ function handleMessage(event) {
       break;
     case '!donetask':
       if (userRoles.mod || userRoles.broadcaster) {
-        const taskToComplete = lists["Viewers"].tasks.find(t => t.username.toLowerCase() === args[0].toLowerCase());
+        // Find the task in ANY list that matches the username
+        let taskToComplete, listName;
+        for (const name in lists) {
+          const task = lists[name].tasks.find(t => t.username && t.username.toLowerCase() === args[0].toLowerCase());
+          if (task) {
+            taskToComplete = task;
+            listName = name;
+            break;
+          }
+        }
         if (taskToComplete && taskToComplete.status !== 'completed') {
           taskToComplete.status = 'completed';
           incrementProgress();
-          renderList("Viewers");
+          renderList(listName);
           saveData();
         }
       }
@@ -179,34 +185,51 @@ function addPendingTask(username, taskText) {
 }
 function approvePendingTask(username) {
   const taskToApprove = pendingTasks.find(t => t.username.toLowerCase() === username.toLowerCase());
-  if (taskToApprove) {
-    const viewerList = lists["Viewers"];
-    if (viewerList.tasks.length < (viewerList.limit || config.viewerTaskLimit)) {
-      viewerList.tasks.push({
-        ...taskToApprove,
-        status: 'active',
-        lastSeen: Date.now()
-      });
-      pendingTasks = pendingTasks.filter(t => t.username.toLowerCase() !== username.toLowerCase());
-      renderList("Viewers");
-      saveData();
-      // TODO: Add chat feedback
-    } else {
-      console.log("Viewer task list is full.");
-      // TODO: Add chat feedback
-    }
+  if (!taskToApprove) return;
+
+  // Use the default list for legacy !task command, or a configurable one.
+  const targetListName = config.defaultListName || "Viewers";
+  const targetList = lists[targetListName];
+  if (!targetList) {
+    console.error(`Default list "${targetListName}" not found for pending task.`);
+    // Maybe create it? For now, just error out.
+    return;
+  }
+  const limit = targetList.limit || config.viewerTaskLimit;
+  if (targetList.tasks.length < limit) {
+    targetList.tasks.push({
+      ...taskToApprove,
+      status: 'active',
+      lastSeen: Date.now()
+    });
+    pendingTasks = pendingTasks.filter(t => t.username.toLowerCase() !== username.toLowerCase());
+    renderList(targetListName);
+    saveData();
+    // TODO: Add chat feedback
+  } else {
+    console.log(`List "${targetListName}" is full.`);
+    // TODO: Add chat feedback
   }
 }
 function updateUserTaskStatus(username, status) {
-  const viewerTask = lists["Viewers"].tasks.find(t => t.username.toLowerCase() === username.toLowerCase());
-  if (viewerTask && viewerTask.status !== 'completed') {
+  // Find the user's task across all lists
+  let userTask, listName;
+  for (const name in lists) {
+    const task = lists[name].tasks.find(t => t.username && t.username.toLowerCase() === username.toLowerCase());
+    if (task) {
+      userTask = task;
+      listName = name;
+      break;
+    }
+  }
+  if (userTask && userTask.status !== 'completed') {
     if (status === 'complete') {
-      viewerTask.status = 'completed';
+      userTask.status = 'completed';
       incrementProgress();
     } else if (status === 'pause') {
-      viewerTask.status = 'paused';
+      userTask.status = 'paused';
     }
-    renderList("Viewers");
+    renderList(listName);
     saveData();
   }
 }
@@ -259,17 +282,18 @@ function renderList(listName) {
   listData.tasks.forEach((task, index) => {
     const li = document.createElement('li');
     let content = '';
+    // Determine content based on task properties
     if (task.username) {
-      // Legacy viewer task format
-      content = `${task.username}: ${task.task}`;
+      // Legacy viewer task from !task command
+      content = `<span>${task.username}:</span> ${task.task}`;
     } else if (task.addedBy) {
-      // New universal task format
-      content = `${task.text} (by ${task.addedBy})`;
+      // Task from !addtask command
+      content = `${task.text} <sub>(by ${task.addedBy})</sub>`;
     } else {
-      // Streamer task format
+      // Simple task (e.g., streamer goal)
       content = task.text;
     }
-    li.textContent = content;
+    li.innerHTML = content;
 
     // Apply styles based on status
     if (task.completed || task.status === 'completed') {
@@ -280,16 +304,25 @@ function renderList(listName) {
       li.style.fontStyle = 'italic';
     }
 
-    // Add dev-only controls for streamer lists for now
-    if (listName === 'Streamer') {
-      const completeButton = document.createElement('button');
-      completeButton.textContent = '✓';
-      completeButton.onclick = e => {
-        e.stopPropagation();
-        window.completeTaskInList(listName, index);
-      };
-      li.appendChild(completeButton);
-    }
+    // Add dev-only controls for any task for now
+    // These are placeholders for better test-ui controls
+    const controls = document.createElement('div');
+    controls.className = 'dev-controls';
+    const completeButton = document.createElement('button');
+    completeButton.textContent = '✓';
+    completeButton.onclick = e => {
+      e.stopPropagation();
+      window.completeTaskInList(listName, index);
+    };
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'X';
+    deleteButton.onclick = e => {
+      e.stopPropagation();
+      window.deleteTaskFromList(listName, index);
+    };
+    controls.appendChild(completeButton);
+    controls.appendChild(deleteButton);
+    li.appendChild(controls);
     ul.appendChild(li);
   });
 }
@@ -304,25 +337,33 @@ function saveData() {
 function checkOfflineUsers() {
   const now = Date.now();
   let changed = false;
-  if (lists["Viewers"]) {
-    lists["Viewers"].tasks.forEach(task => {
-      if (task.status === 'active' && now - task.lastSeen > config.offlineThreshold) {
-        task.status = 'offline';
-        changed = true;
-      }
-    });
-  }
-  if (changed) {
-    renderList("Viewers");
+  // Iterate over all lists and all tasks
+  for (const listName in lists) {
+    const list = lists[listName];
+    if (list.tasks) {
+      list.tasks.forEach(task => {
+        // Check for tasks that have a 'lastSeen' property and are currently 'active'
+        if (task.lastSeen && task.status === 'active' && now - task.lastSeen > config.offlineThreshold) {
+          task.status = 'offline';
+          changed = true; // Mark that a change occurred
+        }
+      });
+    }
+    // If a change happened in this list, re-render it
+    if (changed) {
+      renderList(listName);
+    }
   }
 }
 setInterval(checkOfflineUsers, 60 * 1000);
 
 // --- Functions for Test UI ---
-window.addList = function (listName) {
+window.addList = function (listName, summary = '') {
+  if (!listName.trim()) return;
   if (!lists[listName]) {
     lists[listName] = {
-      tasks: []
+      tasks: [],
+      summary: summary || listName
     };
     renderAllLists();
     saveData();
@@ -335,9 +376,12 @@ window.deleteList = function (listName) {
     saveData();
   }
 };
-window.addTaskToList = function (listName, task) {
-  if (lists[listName]) {
-    lists[listName].tasks.push(task);
+window.addTaskToList = function (listName, taskText) {
+  if (lists[listName] && taskText.trim()) {
+    lists[listName].tasks.push({
+      text: taskText,
+      completed: false
+    });
     renderList(listName);
     saveData();
   }
@@ -363,6 +407,29 @@ window.setProgressPoints = function (points) {
   updateProgressBar();
   saveData();
 };
+
+// --- Test UI Specific ---
+// Simulates a pending task for approval.
+window.addPendingTaskForTest = function (username, task) {
+  if (!pendingTasks.some(t => t.username.toLowerCase() === username.toLowerCase())) {
+    pendingTasks.push({
+      username: username,
+      task: task,
+      status: 'pending'
+    });
+    saveData();
+    // In a real scenario, this would trigger a UI update for mods.
+    // For the test UI, we'll just log it.
+    console.log(`Added pending task for ${username}`);
+  }
+};
+window.getWidgetState = function () {
+  return {
+    lists,
+    pendingTasks,
+    progressPoints
+  };
+};
 function addAlert(message, user, messageId) {
   const elem = document.createElement('div');
   elem.innerHTML = `<div class="alert" id="m${messageId}">
@@ -381,3 +448,21 @@ function addMessage(message, username, messageId, userInfo) {
   document.getElementById('main-container').appendChild(elem);
   console.log("Successfully appended message to the DOM " + message);
 }
+
+window.completeTaskInList = function (listName, taskIndex) {
+  const task = lists[listName]?.tasks[taskIndex];
+  if (task && !task.completed) {
+    task.completed = true;
+    incrementProgress();
+    renderList(listName);
+    saveData();
+  }
+};
+
+window.deleteTaskFromList = function (listName, taskIndex) {
+  if (lists[listName]?.tasks[taskIndex]) {
+    lists[listName].tasks.splice(taskIndex, 1);
+    renderList(listName);
+    saveData();
+  }
+};

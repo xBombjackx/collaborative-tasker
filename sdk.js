@@ -36,9 +36,11 @@ var componentsWatcher = chokidar.watch(path.join(__dirname, "components"), {
 })
 app.use(express.static(path.join(__dirname, "widget")))
 app.use(express.static(path.join(__dirname, "components")))
+app.use('/.sdk', express.static(path.join(__dirname, '.sdk')));
+
 
 app.get("/", function (req, res) {
-    res.sendFile(path.join(__dirname + "/.sdk/index.html"))
+    res.redirect("/.sdk/index.html")
 })
 
 watcher

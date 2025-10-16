@@ -1,212 +1,325 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>CST - Test Environment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="https://livejs.com/live.js"></script>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --primary-text: #1e293b;
+            --secondary-text: #475569;
+            --border-color: #cbd5e1;
+            --accent-color: #4f46e5;
+            --accent-text: #ffffff;
+            --input-bg: #ffffff;
+            --card-bg: #ffffff;
+            --danger-color: #dc2626;
+        }
 
-<head>
-  <meta charset="UTF-8">
-  <title>CST - Test Environment</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      gap: 20px;
-      padding: 10px;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            gap: 24px;
+            padding: 16px;
+            background-color: var(--bg-color);
+            color: var(--primary-text);
+            margin: 0;
+        }
 
-    .widget-container {
-      width: 400px;
-      height: 600px;
-      border: 1px solid #ccc;
-    }
+        .widget-container {
+            width: 400px;
+            height: 80vh;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
 
-    .controls {
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
+        .controls {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 600px;
+        }
 
-    .control-group {
-      border: 1px solid #eee;
-      padding: 10px;
-      border-radius: 5px;
-    }
+        .control-group {
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
 
-    h1,
-    h2,
-    h3 {
-      margin-top: 0;
-    }
+        h1, h2, h3 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+        }
+        h1 { font-size: 1.5rem; }
+        h2 { font-size: 1.25rem; }
+        h3 { font-size: 1.1rem; border-bottom: none; margin-bottom: 12px;}
 
-    input,
-    button,
-    select {
-      padding: 5px;
-    }
-  </style>
-  <script type="text/javascript" src="https://livejs.com/live.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/animejs@3.0.1/lib/anime.min.js"></script>
-  <link href="widget.css" rel="stylesheet">
-  <script src="widget.js"></script>
+        input[type="text"], input[type="number"], select, button {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--primary-text);
+            box-sizing: border-box;
+            font-size: 0.95rem;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: var(--accent-text);
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        button:hover { background-color: #4338ca; }
+        button.danger { background-color: var(--danger-color); }
+        button.danger:hover { background-color: #b91c1c; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        .form-grid .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .command-guide ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .command-guide li {
+            background-color: #f8fafc;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+        }
+        .command-guide code {
+            font-weight: 600;
+            color: #1d4ed8;
+        }
+        .command-guide .desc {
+            display: block;
+            font-family: sans-serif;
+            font-size: 0.9rem;
+            color: var(--secondary-text);
+            margin-top: 4px;
+        }
+        #pending-tasks-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        #pending-tasks-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        #pending-tasks-list li:last-child {
+            border-bottom: none;
+        }
+        #pending-tasks-list .actions button {
+            width: auto;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+        }
+    </style>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/animejs@3.0.1/lib/anime.min.js"></script>
+<link href="widget.css" rel="stylesheet">
+<script src="widget.js"></script>
 
 </head>
 
 <body>
-  <div class="widget-container">
+<div class="widget-container">
     <iframe id="widget-iframe" src="/widget.html"></iframe>
-  </div>
+</div>
 
-  <div class="controls">
+<div class="controls">
     <h1>CST Test Controls</h1>
 
     <div class="control-group">
-      <h3>Emulate Chat Command</h3>
-      <input type="text" id="username-input" placeholder="Username" value="viewer1">
-      <input type="text" id="command-input" placeholder="!command [args]" style="width: 250px;">
-      <select id="user-role-select">
-        <option value="viewer">Viewer</option>
-        <option value="mod">Moderator</option>
-        <option value="broadcaster">Broadcaster</option>
-      </select>
-      <button onclick="emulateCommand()">Send Command</button>
-    </div>
-
-    <div class="control-group command-guide">
-      <h3>Available Commands</h3>
-      <p><strong>Viewer Commands:</strong></p>
-      <ul>
-        <li><code>!task [your task description]</code> - Submits a new task.</li>
-        <li><code>!status complete</code> - Marks your active task as complete.</li>
-        <li><code>!status pause</code> - Marks your active task as paused.</li>
-      </ul>
-      <p><strong>Mod/Streamer Commands:</strong></p>
-      <ul>
-        <li><code>!approve [username]</code> - Approves a pending task for a user.</li>
-        <li><code>!reject [username]</code> - Rejects a pending task for a user.</li>
-        <li><code>!donetask [username]</code> - Marks a viewer's active task as complete.</li>
-      </ul>
+        <h2>Emulate Chat Event</h2>
+        <div class="form-grid">
+            <input type="text" id="username-input" placeholder="Username" value="TestUser">
+            <select id="user-role-select">
+                <option value="viewer">Viewer</option>
+                <option value="mod">Moderator</option>
+                <option value="broadcaster">Broadcaster</option>
+            </select>
+            <input type="text" id="command-input" placeholder="!command [args]" class="full-width">
+            <button onclick="emulateCommand()" class="full-width">Send Command</button>
+        </div>
     </div>
 
     <div class="control-group">
-      <h3>Direct State Manipulation</h3>
-      <p>These functions call directly into the widget's JS</p>
-
-      <h4>Lists</h4>
-      <input type="text" id="list-name-input" placeholder="List Name">
-      <button onclick="addList()">Add List</button>
-      <button onclick="deleteList()">Delete List</button>
-
-      <h4>Tasks</h4>
-      <input type="text" id="task-list-input" placeholder="List Name for Task">
-      <input type="text" id="task-text-input" placeholder="Task Text">
-      <button onclick="addTask()">Add Task</button>
-      <br>
-      <input type="number" id="task-index-input" placeholder="Task Index">
-      <button onclick="completeTask()">Complete Task</button>
-      <button onclick="deleteTask()">Delete Task</button>
-
-      <h4>Progress Bar</h4>
-      <input type="number" id="progress-points-input" placeholder="Points">
-      <button onclick="setPoints()">Set Progress Points</button>
+        <h2>Pending Viewer Tasks</h2>
+        <div class="form-grid">
+             <input type="text" id="pending-user-input" placeholder="Username" value="PendingUser">
+             <input type="text" id="pending-task-input" placeholder="Task description" class="full-width">
+             <button onclick="addPending()" class="full-width">Add to Pending</button>
+        </div>
+        <hr style="margin: 16px 0; border-color: var(--border-color);">
+        <ul id="pending-tasks-list">
+            <!-- Pending tasks will be rendered here -->
+        </ul>
     </div>
-  </div>
 
-  <script>
+    <div class="control-group">
+        <h2>Direct State Manipulation</h2>
+        <div class="form-grid">
+            <input type="text" id="list-name-input" placeholder="List Name" class="full-width">
+            <button onclick="addList()">Add List</button>
+            <button onclick="deleteList()" class="danger">Delete List</button>
+
+            <input type="text" id="task-text-input" placeholder="Task Text" class="full-width">
+            <button onclick="addTask()" class="full-width">Add Task to List</button>
+
+            <input type="number" id="progress-points-input" placeholder="Total Points" class="full-width">
+            <button onclick="setPoints()" class="full-width">Set Progress Points</button>
+        </div>
+    </div>
+
+    <div class="control-group command-guide">
+        <h2>Available Commands</h2>
+        <ul>
+            <li><code>!task [description]</code><span class="desc">Submits a new task to the default 'Viewers' list for approval.</span></li>
+            <li><code>!addtask [list] [desc]</code><span class="desc">Adds a task directly to a specified list.</span></li>
+            <li><code>!status [complete|pause]</code><span class="desc">Updates the status of your own active task.</span></li>
+            <li><code>!approve [username]</code><span class="desc">MOD: Approves a user's pending task.</span></li>
+            <li><code>!reject [username]</code><span class="desc">MOD: Rejects a user's pending task.</span></li>
+            <li><code>!donetask [username]</code><span class="desc">MOD: Marks a user's active task as complete.</span></li>
+        </ul>
+    </div>
+</div>
+
+<script>
     const iframe = document.getElementById('widget-iframe');
-    const widgetWindow = iframe.contentWindow;
+    let widgetWindow;
 
-    // Give the iframe time to load
     iframe.onload = () => {
-      console.log("Widget Iframe Loaded.");
+        widgetWindow = iframe.contentWindow;
+        console.log("Widget Iframe Loaded.");
+        // Periodically refresh the state for the test UI
+        setInterval(refreshUiState, 1000);
     };
 
     function getRoleTags(role) {
-      switch (role) {
-        case 'mod': return { mod: true };
-        case 'broadcaster': return { broadcaster: true };
-        default: return {};
-      }
+        const tags = { mod: false, broadcaster: false };
+        if (role === 'mod') tags.mod = true;
+        if (role === 'broadcaster') tags.broadcaster = true;
+        return tags;
     }
 
-    function emulateCommand() {
-      const username = document.getElementById('username-input').value;
-      const command = document.getElementById('command-input').value;
-      const role = document.getElementById('user-role-select').value;
+    function emulateCommand(commandOverride) {
+        const username = document.getElementById('username-input').value;
+        const command = commandOverride || document.getElementById('command-input').value;
+        const role = document.getElementById('user-role-select').value;
 
-      if (!username || !command) {
-        alert("Username and command are required.");
-        return;
-      }
-
-      const event = {
-        listener: 'message',
-        event: {
-          data: {
-            text: command,
-            displayName: username,
-            tags: getRoleTags(role)
-          }
+        if (!username || !command) {
+            alert("Username and command are required.");
+            return;
         }
-      };
-      widgetWindow.postMessage({ type: 'event:received', detail: event }, '*');
+
+        const event = {
+            listener: 'message',
+            event: {
+                data: { text: command, displayName: username, tags: getRoleTags(role) }
+            }
+        };
+        widgetWindow.postMessage({ type: 'event:received', detail: event }, '*');
     }
 
-    // --- Direct Manipulation Functions ---
-    // Note: These rely on functions being available in the widget's global scope.
-    // This will require changes in widget.js to expose them.
-
+    // --- Direct Manipulation ---
     function addList() {
-      const listName = document.getElementById('list-name-input').value;
-      if (listName && typeof widgetWindow.addList === 'function') {
-        widgetWindow.addList(listName);
-      }
+        const listName = document.getElementById('list-name-input').value;
+        if (listName && typeof widgetWindow.addList === 'function') {
+            widgetWindow.addList(listName);
+        }
     }
 
     function deleteList() {
-      const listName = document.getElementById('list-name-input').value;
-      if (listName && typeof widgetWindow.deleteList === 'function') {
-        widgetWindow.deleteList(listName);
-      }
+        const listName = document.getElementById('list-name-input').value;
+        if (listName && confirm(`Are you sure you want to delete the list "${listName}"?`)) {
+           if(typeof widgetWindow.deleteList === 'function') widgetWindow.deleteList(listName);
+        }
     }
 
     function addTask() {
-      const listName = document.getElementById('task-list-input').value;
-      const taskText = document.getElementById('task-text-input').value;
-      if (listName && taskText && typeof widgetWindow.addTaskToList === 'function') {
-        widgetWindow.addTaskToList(listName, { text: taskText, completed: false });
-      }
-    }
-
-    function completeTask() {
-      const listName = document.getElementById('task-list-input').value;
-      const taskIndex = parseInt(document.getElementById('task-index-input').value, 10);
-      if (listName && !isNaN(taskIndex) && typeof widgetWindow.completeTaskInList === 'function') {
-        widgetWindow.completeTaskInList(listName, taskIndex);
-      }
-    }
-
-    function deleteTask() {
-      const listName = document.getElementById('task-list-input').value;
-      const taskIndex = parseInt(document.getElementById('task-index-input').value, 10);
-      if (listName && !isNaN(taskIndex) && typeof widgetWindow.deleteTaskFromList === 'function') {
-        widgetWindow.deleteTaskFromList(listName, taskIndex);
-      }
+        const listName = document.getElementById('list-name-input').value;
+        const taskText = document.getElementById('task-text-input').value;
+        if (!listName) {
+            alert("Please enter a list name to add a task to.");
+            return;
+        }
+        if (taskText && typeof widgetWindow.addTaskToList === 'function') {
+            widgetWindow.addTaskToList(listName, taskText);
+            document.getElementById('task-text-input').value = '';
+        }
     }
 
     function setPoints() {
-      const points = parseInt(document.getElementById('progress-points-input').value, 10);
-      if (!isNaN(points) && typeof widgetWindow.setProgressPoints === 'function') {
-        widgetWindow.setProgressPoints(points);
-      }
+        const points = parseInt(document.getElementById('progress-points-input').value, 10);
+        if (!isNaN(points) && typeof widgetWindow.setProgressPoints === 'function') {
+            widgetWindow.setProgressPoints(points);
+        }
     }
-  </script>
 
-</body>
+    // --- Pending Task Simulation ---
+    function addPending() {
+        const username = document.getElementById('pending-user-input').value;
+        const task = document.getElementById('pending-task-input').value;
+        if(username && task && typeof widgetWindow.addPendingTaskForTest === 'function') {
+            widgetWindow.addPendingTaskForTest(username, task);
+            document.getElementById('pending-task-input').value = '';
+        }
+    }
 
-</html>
+    // --- UI State Refresh ---
+    function refreshUiState() {
+        if (typeof widgetWindow.getWidgetState !== 'function') return;
+
+        const state = widgetWindow.getWidgetState();
+        const pendingList = document.getElementById('pending-tasks-list');
+        pendingList.innerHTML = ''; // Clear current list
+
+        if(state.pendingTasks.length === 0) {
+            pendingList.innerHTML = '<li>No pending tasks.</li>';
+        } else {
+            state.pendingTasks.forEach(task => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span><strong>${task.username}</strong>: ${task.task}</span>
+                    <div class="actions">
+                        <button onclick="emulateCommand('!approve ${task.username}')">Approve</button>
+                        <button onclick="emulateCommand('!reject ${task.username}')" class="danger">Reject</button>
+                    </div>
+                `;
+                pendingList.appendChild(li);
+            });
+        }
+    }
+
+</script>
+
+
+</body></html>

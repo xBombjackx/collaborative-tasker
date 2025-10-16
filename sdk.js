@@ -22,6 +22,16 @@ const logger = pino({
     },
 })
 
+// Copy widget files to .sdk directory
+fs.copyFileSync(
+    path.join(__dirname, "widget", "widget.js"),
+    path.join(__dirname, ".sdk", "widget.js")
+)
+fs.copyFileSync(
+    path.join(__dirname, "widget", "widget.css"),
+    path.join(__dirname, ".sdk", "widget.css")
+)
+
 var watcher = chokidar.watch(path.join(__dirname, "widget"), {
     ignored: /^\./,
     persistent: true,
@@ -291,7 +301,7 @@ function parseComponents() {
                     ${beforeScripts.join("\n")} 
                     const elem = document.createElement('div');
                     elem.innerHTML = 
-${$( "body" ).html()}
+${$( "body").html()}
                     document.getElementById('main-container').appendChild(elem);
                     ${afterScrips.join("\n")} 
                     }`

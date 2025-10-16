@@ -1,50 +1,46 @@
-# CST Widget TODO List
+# CST Widget TODO List (v2)
 
-This document outlines the necessary improvements, bug fixes, and future features for the Collaborative Stream Tasker (CST) widget. This is based on a code review performed on YYYY-MM-DD.
+This document outlines the refactoring tasks, bug fixes, and feature implementations needed to advance the Collaborative Stream Tasker (CST) widget.
 
-## High Priority: Core Functionality & Refactoring
+---
 
--   [ ] **Implement Multiple List Support:**
-    -   Refactor `widget.js` to handle an array/object of lists instead of hardcoded `streamerTasks` and `viewerTasks`.
-    -   Each list should have its own properties (e.g., `name`, `tasks`, `permissions`).
-    -   Update `widget.html` to dynamically render all lists.
--   [ ] **Create a Comprehensive Test UI:**
-    -   Modify `.sdk/index.html` to be a full-featured testing suite.
-    -   Add buttons/inputs to simulate every chat command (`!task`, `!approve`, `!status`, `!addtask`).
-    -   Add controls to directly manipulate widget state (add/complete tasks for any list, change progress bar).
--   [ ] **Universal Task Addition Command:**
-    -   Implement a new command like `!addtask [listName] [task description]` to allow users to add tasks to any list.
-    -   Permissions will be handled in a later stage, but the basic functionality should be there.
+## High Priority: Refactoring & Core Bugs
 
-## Medium Priority: Code Quality & Feature Completion
+-   [ ] **Modularize `widget.js`**:
+    -   Break down the single `widget.js` file into smaller, focused modules (e.g., `state.js` for data management, `ui.js` for rendering, `commands.js` for chat command logic). This will improve maintainability.
+-   [ ] **Fix Redundant Code**:
+    -   Remove the duplicate `addAlert` and `addMessage` function declarations at the bottom of `widget.js` to prevent potential errors and confusion.
+-   [ ] **Implement Efficient DOM Updates**:
+    -   Refactor the rendering functions (`renderAllLists`, `renderList`) to update only the specific elements that change, instead of re-rendering the entire list on every update.
+-   [ ] **Centralize Test UI Functions**:
+    -   Avoid polluting the global `window` object. Group all functions intended for the test UI (`addList`, `deleteList`, etc.) under a single object, like `window.CST_API`.
 
--   [ ] **Remove Hardcoded Values:**
-    -   The viewer task limit (currently `3`) should be a configurable field in `fields.json`.
-    -   PRS Tier thresholds (`3`, `7`, `12`) should be configurable.
-    -   The offline user threshold (`5 minutes`) should be configurable.
--   [ ] **Improve User Feedback:**
-    -   Implement chat confirmations for all commands, both successful and failed attempts (e.g., "Your task has been submitted for approval," "You already have an active task," "The viewer task list is full.").
-    -   This is a requirement from the `design.md` that is not fully implemented.
--   [ ] **Complete Streamer Task Functionality:**
-    -   The `design.md` specifies that streamer tasks should be managed from the Widget Config Panel. The current implementation uses UI buttons that were not in the design. This needs to be reconciled.
-    -   Decide on a single source of truth for streamer task management.
--   [ ] **Visual Polish & PRS Feedback:**
-    -   Implement the visual feedback for the Progress Reward System as specified in `design.md` (e.g., celebratory visual effect on task completion, tier completion animations/sounds).
+---
+
+## Medium Priority: Feature Implementation & Configuration
+
+-   [ ] **Make Widget Fully Configurable**:
+    -   Remove hardcoded values from `widget.js`.
+    -   Update the `onWidgetLoad` function to correctly pull PRS Tier thresholds (`tier1Threshold`, `tier2Threshold`, `tier3Threshold`) and the `viewerTaskLimit` from `fieldData`.
+-   [ ] **Implement User Feedback System**:
+    -   As required by `design.md`, create a system to send chat confirmations for all command actions (e.g., `!task`, `!approve`, `!reject`, `!status`).
+    -   The feedback should cover both successful actions and errors (e.g., "Task list is full," "You already have a pending task.").
+-   [ ] **Add Visual Polish for PRS**:
+    -   Implement the celebratory visual effects for task and tier completion as specified in `design.md` (e.g., confetti effect, glowing tier markers).
+-   [ ] **Enhance Test UI (`.sdk/index.html`)**:
+    -   Add controls to simulate every chat command listed in `design.md`.
+    -   Add a section to display a guide for all available commands for easy reference.
+    -   Improve the overall styling to make it more user-friendly.
+
+---
 
 ## Low Priority: Future Features & Optimizations
 
--   [ ] **Develop a Permission System:**
-    -   Create a system to define who can add/edit/complete tasks on each list (e.g., `everyone`, `mods`, `streamer`, `specific users`).
--   [ ] **Refactor `widget.js`:**
-    -   Improve code modularity by separating concerns (e.g., UI rendering, data management, event handling).
-    -   Add JSDoc comments to explain complex functions.
--   [ ] **Optimize `checkOfflineUsers`:**
-    -   The current implementation iterates over all viewer tasks every minute. This could be optimized, perhaps by only checking users who haven't been seen recently.
--   [ ] **Channel Points Integration:**
+-   [ ] **Develop a Permission System**:
+    -   Create a system to define who can add/edit/complete tasks on each list (e.g., everyone, mods, streamer). This could be managed via `fields.json`.
+-   [ ] **Optimize `checkOfflineUsers`**:
+    -   Investigate more performant ways to check for offline users, potentially reducing how often the check runs or how it iterates through tasks.
+-   [ ] **Channel Points Integration**:
     -   Begin planning for the Phase 2 feature of allowing viewers to use channel points to bypass the moderation queue.
--   [ ] **Persistence & Reset Logic:**
-    -   Ensure the "persist across stream restarts within the same day/session" feature from `design.md` is fully implemented and robust. Add a manual "reset session" button for the streamer in the config.
-
-##  Test UI Stuff
--   [ ] **Style the test UI**
--   [ ] **Make sure test UI has all commands testable and all commands displayed as a guide**
+-   [ ] **Add Session Reset Logic**:
+    -   Implement a manual "reset session" button in the widget configuration that clears all tasks and progress, as mentioned in the `design.md`'s persistence requirement.

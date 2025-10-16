@@ -1,0 +1,52 @@
+.main-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.completed {
+  text-decoration: line-through !important;
+  opacity: 0.6;
+}
+
+.progress-reward-system {
+  text-align: center;
+}
+
+.progress-bar-container {
+  width: 100%;
+  background-color: #555;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+.progress-bar {
+  width: 0%;
+  height: 20px;
+  background-color: var(--progress-bar-color);
+  border-radius: 5px;
+  transition: width 0.5s ease-in-out;
+}
+
+.progress-text {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.tier-1-complete {
+  background-color: #ffeb3b;
+    /* Yellow */
+}
+
+.tier-2-complete {
+  background-color: #ff9800;
+    /* Orange */
+}
+
+.tier-3-complete {
+  background-color: #f44336;
+    /* Red */
+}

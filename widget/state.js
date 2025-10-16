@@ -150,6 +150,13 @@ function loadData() {
     return SE_API.store.get("cst_data");
 }
 
+function resetState() {
+    lists = {};
+    pendingTasks = [];
+    progressPoints = 0;
+    saveData();
+}
+
 export {
     config,
     getLists,
@@ -171,4 +178,5 @@ export {
     setProgress,
     saveData,
     loadData,
+    resetState,
 };

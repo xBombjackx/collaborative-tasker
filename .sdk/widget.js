@@ -216,6 +216,15 @@ window.CST_API = {
       progressPoints: State.getProgressPoints()
     };
   },
+  resetAllData: () => {
+    State.resetState();
+    // After resetting, we need to re-initialize and render
+    const config = State.getConfig();
+    initializeDefaultState(config);
+    UI.renderAllLists(State.getLists(), config);
+    UI.updateProgressBar(State.getProgressPoints(), config);
+    console.log("Widget data has been reset.");
+  },
   emulateMessage: (message, username = "TestUser", tags = { broadcaster: true }) => {
     const mockEvent = {
       listener: "message",

@@ -92,58 +92,47 @@
 
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 12px;
         }
         .form-grid .full-width {
             grid-column: 1 / -1;
         }
 
-        .command-guide ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-        .command-guide li {
-            background-color: #f8fafc;
-            padding: 8px;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-        }
-        .command-guide code {
-            font-weight: 600;
-            color: #1d4ed8;
-        }
-        .command-guide .desc {
-            display: block;
-            font-family: sans-serif;
-            font-size: 0.9rem;
-            color: var(--secondary-text);
-            margin-top: 4px;
-        }
-        #pending-tasks-list {
+        #pending-tasks-list, #task-management-list {
             list-style-type: none;
             padding: 0;
         }
-        #pending-tasks-list li {
+        #pending-tasks-list li, #task-management-list li {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 8px;
             border-bottom: 1px solid var(--border-color);
         }
-        #pending-tasks-list li:last-child {
+        #pending-tasks-list li:last-child, #task-management-list li:last-child {
             border-bottom: none;
         }
-        #pending-tasks-list .actions button {
+        #pending-tasks-list .actions button, #task-management-list .actions button {
             width: auto;
             padding: 4px 8px;
             font-size: 0.8rem;
             margin-left: 8px;
         }
+        pre {
+            background-color: #f8fafc;
+            padding: 12px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: 1px solid var(--border-color);
+        }
     </style>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/animejs@3.0.1/lib/anime.min.js"></script>
+<link href="/widget.css" rel="stylesheet">
+<script src="/widget.js"></script>
+
 <link href="widget.css" rel="stylesheet">
 <script src="widget.js"></script>
 
@@ -155,20 +144,29 @@
 </div>
 
 <div class="controls">
+    <a href="/widget.html" target="_blank" style="display: block; text-align: center; padding: 10px; background-color: var(--accent-color); color: var(--accent-text); border-radius: 4px; text-decoration: none; margin-bottom: 20px;">Open Widget in New Tab</a>
     <h1>CST Test Controls</h1>
 
     <div class="control-group">
-        <h2>Emulate Chat Event</h2>
+        <h2>List Management</h2>
         <div class="form-grid">
-            <input type="text" id="username-input" placeholder="Username" value="TestUser">
-            <select id="user-role-select">
-                <option value="viewer">Viewer</option>
-                <option value="mod">Moderator</option>
-                <option value="broadcaster">Broadcaster</option>
-            </select>
-            <input type="text" id="command-input" placeholder="!command [args]" class="full-width">
-            <button onclick="emulateCommand()" class="full-width">Send Command</button>
+            <input type="text" id="list-name-input" placeholder="New List Name" class="full-width">
+            <button onclick="addList()">Add List</button>
+            <select id="delete-list-select" class="full-width" aria-label="Select list to delete"></select>
+            <button onclick="deleteList()" class="danger">Delete Selected List</button>
         </div>
+    </div>
+
+    <div class="control-group">
+        <h2>Task Management</h2>
+        <div class="form-grid">
+            <select id="task-list-select" class="full-width" aria-label="Select list to manage tasks"></select>
+            <input type="text" id="task-text-input" placeholder="New Task Text" class="full-width">
+            <button onclick="addTask()" class="full-width">Add Task to Selected List</button>
+        </div>
+        <hr style="margin: 16px 0; border-color: var(--border-color);">
+        <h3>Tasks in Selected List</h3>
+        <ul id="task-management-list"></ul>
     </div>
 
     <div class="control-group">
@@ -176,40 +174,27 @@
         <div class="form-grid">
              <input type="text" id="pending-user-input" placeholder="Username" value="PendingUser">
              <input type="text" id="pending-task-input" placeholder="Task description" class="full-width">
-             <button onclick="addPending()" class="full-width">Add to Pending</button>
+             <button onclick="addPending()" class="full-width">Add Pending Task</button>
         </div>
         <hr style="margin: 16px 0; border-color: var(--border-color);">
-        <ul id="pending-tasks-list">
-            <!-- Pending tasks will be rendered here -->
-        </ul>
+        <h3>Pending Tasks</h3>
+        <ul id="pending-tasks-list"></ul>
     </div>
 
     <div class="control-group">
-        <h2>Direct State Manipulation</h2>
+        <h2>Other Controls</h2>
         <div class="form-grid">
-            <input type="text" id="list-name-input" placeholder="List Name" class="full-width">
-            <button onclick="addList()">Add List</button>
-            <button onclick="deleteList()" class="danger">Delete List</button>
-
-            <input type="text" id="task-text-input" placeholder="Task Text" class="full-width">
-            <button onclick="addTask()" class="full-width">Add Task to List</button>
-
             <input type="number" id="progress-points-input" placeholder="Total Points" class="full-width">
             <button onclick="setPoints()" class="full-width">Set Progress Points</button>
         </div>
     </div>
 
-    <div class="control-group command-guide">
-        <h2>Available Commands</h2>
-        <ul>
-            <li><code>!task [description]</code><span class="desc">Submits a new task to the default 'Viewers' list for approval.</span></li>
-            <li><code>!addtask [list] [desc]</code><span class="desc">Adds a task directly to a specified list.</span></li>
-            <li><code>!status [complete|pause]</code><span class="desc">Updates the status of your own active task.</span></li>
-            <li><code>!approve [username]</code><span class="desc">MOD: Approves a user's pending task.</span></li>
-            <li><code>!reject [username]</code><span class="desc">MOD: Rejects a user's pending task.</span></li>
-            <li><code>!donetask [username]</code><span class="desc">MOD: Marks a user's active task as complete.</span></li>
-        </ul>
+    <div class="control-group">
+        <h2>Widget State</h2>
+        <button onclick="showWidgetState()" class="full-width">Get and Show Widget State</button>
+        <pre id="widget-state-display"></pre>
     </div>
+
 </div>
 
 <script>
@@ -219,7 +204,6 @@
     iframe.onload = () => {
         widgetWindow = iframe.contentWindow;
         console.log("Widget Iframe Loaded.");
-        // Periodically refresh the state for the test UI
         setInterval(refreshUiState, 1000);
     };
 
@@ -249,26 +233,26 @@
         widgetWindow.postMessage({ type: 'event:received', detail: event }, '*');
     }
 
-    // --- Direct Manipulation ---
     function addList() {
         const listName = document.getElementById('list-name-input').value;
         if (listName && typeof widgetWindow.addList === 'function') {
             widgetWindow.addList(listName);
+            document.getElementById('list-name-input').value = '';
         }
     }
 
     function deleteList() {
-        const listName = document.getElementById('list-name-input').value;
+        const listName = document.getElementById('delete-list-select').value;
         if (listName && confirm(`Are you sure you want to delete the list "${listName}"?`)) {
            if(typeof widgetWindow.deleteList === 'function') widgetWindow.deleteList(listName);
         }
     }
 
     function addTask() {
-        const listName = document.getElementById('list-name-input').value;
+        const listName = document.getElementById('task-list-select').value;
         const taskText = document.getElementById('task-text-input').value;
         if (!listName) {
-            alert("Please enter a list name to add a task to.");
+            alert("Please select a list to add a task to.");
             return;
         }
         if (taskText && typeof widgetWindow.addTaskToList === 'function') {
@@ -284,7 +268,6 @@
         }
     }
 
-    // --- Pending Task Simulation ---
     function addPending() {
         const username = document.getElementById('pending-user-input').value;
         const task = document.getElementById('pending-task-input').value;
@@ -294,14 +277,20 @@
         }
     }
 
-    // --- UI State Refresh ---
+    function showWidgetState() {
+        if (typeof widgetWindow.getWidgetState !== 'function') return;
+        const state = widgetWindow.getWidgetState();
+        document.getElementById('widget-state-display').textContent = JSON.stringify(state, null, 2);
+    }
+
     function refreshUiState() {
         if (typeof widgetWindow.getWidgetState !== 'function') return;
 
         const state = widgetWindow.getWidgetState();
-        const pendingList = document.getElementById('pending-tasks-list');
-        pendingList.innerHTML = ''; // Clear current list
 
+        // Refresh pending tasks
+        const pendingList = document.getElementById('pending-tasks-list');
+        pendingList.innerHTML = '';
         if(state.pendingTasks.length === 0) {
             pendingList.innerHTML = '<li>No pending tasks.</li>';
         } else {
@@ -317,9 +306,52 @@
                 pendingList.appendChild(li);
             });
         }
+
+        // Refresh list dropdowns
+        const deleteListSelect = document.getElementById('delete-list-select');
+        const taskListSelect = document.getElementById('task-list-select');
+        const currentDeleteVal = deleteListSelect.value;
+        const currentTaskVal = taskListSelect.value;
+        deleteListSelect.innerHTML = '';
+        taskListSelect.innerHTML = '';
+
+        for (const listName in state.lists) {
+            const option = new Option(listName, listName);
+            deleteListSelect.add(option.cloneNode(true));
+            taskListSelect.add(option);
+        }
+        deleteListSelect.value = currentDeleteVal;
+        taskListSelect.value = currentTaskVal;
+
+        // Refresh task management list
+        const taskManagementList = document.getElementById('task-management-list');
+        taskManagementList.innerHTML = '';
+        const selectedList = taskListSelect.value;
+
+        if (selectedList && state.lists[selectedList]) {
+            state.lists[selectedList].tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${task.text}</span>`;
+                const actions = document.createElement('div');
+                actions.className = 'actions';
+
+                const completeButton = document.createElement('button');
+                completeButton.textContent = 'Complete';
+                completeButton.onclick = () => widgetWindow.completeTaskInList(selectedList, index);
+                actions.appendChild(completeButton);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.className = 'danger';
+                deleteButton.onclick = () => widgetWindow.deleteTaskFromList(selectedList, index);
+                actions.appendChild(deleteButton);
+
+                li.appendChild(actions);
+                taskManagementList.appendChild(li);
+            });
+        }
     }
 
 </script>
-
 
 </body></html>

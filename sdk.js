@@ -288,11 +288,12 @@ function parseComponents() {
                 const functionName = file.replace(".html", "")
                 const formattedFunctionName = `add${functionName.charAt(0).toUpperCase() + functionName.slice(1)}`
                 const functionBody = `function ${formattedFunctionName}(${variables.join(", ")}) {
-                    ${beforeScripts.join("\n")}
+                    ${beforeScripts.join("\n")} 
                     const elem = document.createElement('div');
-                    elem.innerHTML = \`${$("body").html()}\`;
+                    elem.innerHTML = 
+${$( "body" ).html()}
                     document.getElementById('main-container').appendChild(elem);
-                    ${afterScrips.join("\n")}
+                    ${afterScrips.join("\n")} 
                     }`
 
                 const functionNode = babelParser.parse(functionBody, {

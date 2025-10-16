@@ -33,8 +33,6 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            position: sticky;
-            top: 16px;
         }
 
         iframe {
@@ -185,7 +183,6 @@
         <div class="form-grid">
             <input type="number" id="progress-points-input" placeholder="Total Points" class="full-width">
             <button id="set-points-button" class="full-width">Set Progress Points</button>
-            <button id="reset-data-button" class="full-width danger">Reset All Data</button>
         </div>
     </div>
 
@@ -250,7 +247,6 @@
         getEl('set-points-button').addEventListener('click', setPoints);
         getEl('show-widget-state-button').addEventListener('click', showWidgetState);
         getEl('emulate-command-button').addEventListener('click', () => emulateCommand());
-        getEl('reset-data-button').addEventListener('click', resetData);
 
         // Use event delegation for dynamically created buttons
         getEl('pending-tasks-list').addEventListener('click', handlePendingListClick);
@@ -330,19 +326,11 @@
         }
     }
 
-    function resetData() {
-        if (confirm("Are you sure you want to reset all widget data? This cannot be undone.")) {
-            widgetWindow.CST_API?.resetAllData();
-        }
-    }
-
     function handlePendingListClick(event) {
         const button = event.target.closest('button');
         if (!button) return;
         const command = button.dataset.command;
         if (command) {
-            // Ensure moderator role is selected for approve/reject actions
-            getEl('command-role-select').value = 'mod';
             emulateCommand(command);
         }
     }

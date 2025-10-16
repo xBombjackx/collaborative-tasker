@@ -117,22 +117,33 @@ function createListItem(task, index) {
 }
 
 function updateListItemContent(li, task) {
-    const taskTextSpan = document.createElement('span');
-    taskTextSpan.className = 'task-text';
-    taskTextSpan.textContent = task.text || task.task; // Support both structures
-
-    const taskUserSpan = document.createElement('span');
-    taskUserSpan.className = 'task-user';
-    const user = task.username || task.addedBy;
-    if (user) {
-        taskUserSpan.textContent = `(by ${user})`;
+    let taskTextSpan = li.querySelector('.task-text');
+    if (!taskTextSpan) {
+        taskTextSpan = document.createElement('span');
+        taskTextSpan.className = 'task-text';
+        li.appendChild(taskTextSpan);
+    }
+    const newText = task.text || task.task;
+    if (taskTextSpan.textContent !== newText) {
+        taskTextSpan.textContent = newText;
     }
 
-    // Clear existing content and append new spans
-    li.innerHTML = '';
-    li.appendChild(taskTextSpan);
+    let taskUserSpan = li.querySelector('.task-user');
+    const user = task.username || task.addedBy;
+
     if (user) {
-        li.appendChild(taskUserSpan);
+        if (!taskUserSpan) {
+            taskUserSpan = document.createElement('span');
+            taskUserSpan.className = 'task-user';
+            li.appendChild(taskUserSpan);
+        }
+        const newUserText = `(by ${user})`;
+        if (taskUserSpan.textContent !== newUserText) {
+            taskUserSpan.textContent = newUserText;
+        }
+    } else if (taskUserSpan) {
+        // If there's no user but the span exists, remove it
+        taskUserSpan.remove();
     }
 }
 

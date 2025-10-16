@@ -1,3 +1,25 @@
+// Mock SE_API for local development
+if (typeof SE_API === 'undefined') {
+  console.log("SE_API is not defined. Mocking for local development.");
+  window.SE_API = {
+    store: {
+      get: function (key) {
+        return new Promise((resolve) => {
+          const data = sessionStorage.getItem(key);
+          resolve(data ? JSON.parse(data) : null);
+        });
+      },
+      set: function (key, value) {
+        return new Promise((resolve) => {
+          sessionStorage.setItem(key, JSON.stringify(value));
+          resolve();
+        });
+      }
+    }
+    // You can mock other SE_API functions here as needed
+  };
+}
+
 // Main data structure
 let lists = {};
 let pendingTasks = [];

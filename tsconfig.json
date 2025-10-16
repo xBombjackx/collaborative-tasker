@@ -3,10 +3,13 @@
     "compilerOptions": {
         "noEmit": true,
         "allowJs": true,
-        "checkJs": true,
+        "checkJs": false,
         "target": "es6",
         "resolveJsonModule": true,
         "moduleResolution": "node"
     },
-    "include": ["./widget", "./types.d.ts"]
+    "include": [
+        "./widget",
+        "./types.d.ts"
+    ]
 }

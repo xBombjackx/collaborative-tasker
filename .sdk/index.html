@@ -1,154 +1,212 @@
-<!DOCTYPE html><html lang="en"><head>
-    <meta charset="UTF-8">
-    <title>CST - Test Environment</title>
-    <style>
-        body { font-family: sans-serif; display: flex; gap: 20px; padding: 10px; }
-        .widget-container { width: 400px; height: 600px; border: 1px solid #ccc; }
-        iframe { width: 100%; height: 100%; border: none; }
-        .controls { flex-grow: 1; display: flex; flex-direction: column; gap: 15px; }
-        .control-group { border: 1px solid #eee; padding: 10px; border-radius: 5px; }
-        h1, h2, h3 { margin-top: 0; }
-        input, button, select { padding: 5px; }
-    </style>
-<script type="text/javascript" src="https://livejs.com/live.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/animejs@3.0.1/lib/anime.min.js"></script>
-<link href="widget.css" rel="stylesheet">
-<script src="widget.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>CST - Test Environment</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      gap: 20px;
+      padding: 10px;
+    }
+
+    .widget-container {
+      width: 400px;
+      height: 600px;
+      border: 1px solid #ccc;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .controls {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .control-group {
+      border: 1px solid #eee;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin-top: 0;
+    }
+
+    input,
+    button,
+    select {
+      padding: 5px;
+    }
+  </style>
+  <script type="text/javascript" src="https://livejs.com/live.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.0.1/lib/anime.min.js"></script>
+  <link href="widget.css" rel="stylesheet">
+  <script src="widget.js"></script>
 
 </head>
+
 <body>
-    <div class="widget-container">
-        <iframe id="widget-iframe" src="../widget/widget.html"></iframe>
+  <div class="widget-container">
+    <iframe id="widget-iframe" src="/widget.html"></iframe>
+  </div>
+
+  <div class="controls">
+    <h1>CST Test Controls</h1>
+
+    <div class="control-group">
+      <h3>Emulate Chat Command</h3>
+      <input type="text" id="username-input" placeholder="Username" value="viewer1">
+      <input type="text" id="command-input" placeholder="!command [args]" style="width: 250px;">
+      <select id="user-role-select">
+        <option value="viewer">Viewer</option>
+        <option value="mod">Moderator</option>
+        <option value="broadcaster">Broadcaster</option>
+      </select>
+      <button onclick="emulateCommand()">Send Command</button>
     </div>
 
-    <div class="controls">
-        <h1>CST Test Controls</h1>
-
-        <div class="control-group">
-            <h3>Emulate Chat Command</h3>
-            <input type="text" id="username-input" placeholder="Username" value="viewer1">
-            <input type="text" id="command-input" placeholder="!command [args]" style="width: 250px;">
-            <select id="user-role-select">
-                <option value="viewer">Viewer</option>
-                <option value="mod">Moderator</option>
-                <option value="broadcaster">Broadcaster</option>
-            </select>
-            <button onclick="emulateCommand()">Send Command</button>
-        </div>
-
-        <div class="control-group">
-            <h3>Direct State Manipulation</h3>
-            <p>These functions call directly into the widget's JS</p>
-
-            <h4>Lists</h4>
-            <input type="text" id="list-name-input" placeholder="List Name">
-            <button onclick="addList()">Add List</button>
-            <button onclick="deleteList()">Delete List</button>
-
-            <h4>Tasks</h4>
-            <input type="text" id="task-list-input" placeholder="List Name for Task">
-            <input type="text" id="task-text-input" placeholder="Task Text">
-            <button onclick="addTask()">Add Task</button>
-            <br>
-            <input type="number" id="task-index-input" placeholder="Task Index">
-            <button onclick="completeTask()">Complete Task</button>
-            <button onclick="deleteTask()">Delete Task</button>
-
-            <h4>Progress Bar</h4>
-            <input type="number" id="progress-points-input" placeholder="Points">
-            <button onclick="setPoints()">Set Progress Points</button>
-        </div>
+    <div class="control-group command-guide">
+      <h3>Available Commands</h3>
+      <p><strong>Viewer Commands:</strong></p>
+      <ul>
+        <li><code>!task [your task description]</code> - Submits a new task.</li>
+        <li><code>!status complete</code> - Marks your active task as complete.</li>
+        <li><code>!status pause</code> - Marks your active task as paused.</li>
+      </ul>
+      <p><strong>Mod/Streamer Commands:</strong></p>
+      <ul>
+        <li><code>!approve [username]</code> - Approves a pending task for a user.</li>
+        <li><code>!reject [username]</code> - Rejects a pending task for a user.</li>
+        <li><code>!donetask [username]</code> - Marks a viewer's active task as complete.</li>
+      </ul>
     </div>
 
-    <script>
-        const iframe = document.getElementById('widget-iframe');
-        const widgetWindow = iframe.contentWindow;
+    <div class="control-group">
+      <h3>Direct State Manipulation</h3>
+      <p>These functions call directly into the widget's JS</p>
 
-        // Give the iframe time to load
-        iframe.onload = () => {
-            console.log("Widget Iframe Loaded.");
-        };
+      <h4>Lists</h4>
+      <input type="text" id="list-name-input" placeholder="List Name">
+      <button onclick="addList()">Add List</button>
+      <button onclick="deleteList()">Delete List</button>
 
-        function getRoleTags(role) {
-            switch(role) {
-                case 'mod': return { mod: true };
-                case 'broadcaster': return { broadcaster: true };
-                default: return {};
-            }
+      <h4>Tasks</h4>
+      <input type="text" id="task-list-input" placeholder="List Name for Task">
+      <input type="text" id="task-text-input" placeholder="Task Text">
+      <button onclick="addTask()">Add Task</button>
+      <br>
+      <input type="number" id="task-index-input" placeholder="Task Index">
+      <button onclick="completeTask()">Complete Task</button>
+      <button onclick="deleteTask()">Delete Task</button>
+
+      <h4>Progress Bar</h4>
+      <input type="number" id="progress-points-input" placeholder="Points">
+      <button onclick="setPoints()">Set Progress Points</button>
+    </div>
+  </div>
+
+  <script>
+    const iframe = document.getElementById('widget-iframe');
+    const widgetWindow = iframe.contentWindow;
+
+    // Give the iframe time to load
+    iframe.onload = () => {
+      console.log("Widget Iframe Loaded.");
+    };
+
+    function getRoleTags(role) {
+      switch (role) {
+        case 'mod': return { mod: true };
+        case 'broadcaster': return { broadcaster: true };
+        default: return {};
+      }
+    }
+
+    function emulateCommand() {
+      const username = document.getElementById('username-input').value;
+      const command = document.getElementById('command-input').value;
+      const role = document.getElementById('user-role-select').value;
+
+      if (!username || !command) {
+        alert("Username and command are required.");
+        return;
+      }
+
+      const event = {
+        listener: 'message',
+        event: {
+          data: {
+            text: command,
+            displayName: username,
+            tags: getRoleTags(role)
+          }
         }
+      };
+      widgetWindow.postMessage({ type: 'event:received', detail: event }, '*');
+    }
 
-        function emulateCommand() {
-            const username = document.getElementById('username-input').value;
-            const command = document.getElementById('command-input').value;
-            const role = document.getElementById('user-role-select').value;
+    // --- Direct Manipulation Functions ---
+    // Note: These rely on functions being available in the widget's global scope.
+    // This will require changes in widget.js to expose them.
 
-            if (!username || !command) {
-                alert("Username and command are required.");
-                return;
-            }
+    function addList() {
+      const listName = document.getElementById('list-name-input').value;
+      if (listName && typeof widgetWindow.addList === 'function') {
+        widgetWindow.addList(listName);
+      }
+    }
 
-            const event = {
-                listener: 'message',
-                event: {
-                    data: {
-                        text: command,
-                        displayName: username,
-                        tags: getRoleTags(role)
-                    }
-                }
-            };
-            widgetWindow.postMessage({ type: 'event:received', detail: event }, '*');
-        }
+    function deleteList() {
+      const listName = document.getElementById('list-name-input').value;
+      if (listName && typeof widgetWindow.deleteList === 'function') {
+        widgetWindow.deleteList(listName);
+      }
+    }
 
-        // --- Direct Manipulation Functions ---
-        // Note: These rely on functions being available in the widget's global scope.
-        // This will require changes in widget.js to expose them.
+    function addTask() {
+      const listName = document.getElementById('task-list-input').value;
+      const taskText = document.getElementById('task-text-input').value;
+      if (listName && taskText && typeof widgetWindow.addTaskToList === 'function') {
+        widgetWindow.addTaskToList(listName, { text: taskText, completed: false });
+      }
+    }
 
-        function addList() {
-            const listName = document.getElementById('list-name-input').value;
-            if (listName && typeof widgetWindow.addList === 'function') {
-                widgetWindow.addList(listName);
-            }
-        }
+    function completeTask() {
+      const listName = document.getElementById('task-list-input').value;
+      const taskIndex = parseInt(document.getElementById('task-index-input').value, 10);
+      if (listName && !isNaN(taskIndex) && typeof widgetWindow.completeTaskInList === 'function') {
+        widgetWindow.completeTaskInList(listName, taskIndex);
+      }
+    }
 
-        function deleteList() {
-            const listName = document.getElementById('list-name-input').value;
-            if (listName && typeof widgetWindow.deleteList === 'function') {
-                widgetWindow.deleteList(listName);
-            }
-        }
+    function deleteTask() {
+      const listName = document.getElementById('task-list-input').value;
+      const taskIndex = parseInt(document.getElementById('task-index-input').value, 10);
+      if (listName && !isNaN(taskIndex) && typeof widgetWindow.deleteTaskFromList === 'function') {
+        widgetWindow.deleteTaskFromList(listName, taskIndex);
+      }
+    }
 
-        function addTask() {
-            const listName = document.getElementById('task-list-input').value;
-            const taskText = document.getElementById('task-text-input').value;
-            if (listName && taskText && typeof widgetWindow.addTaskToList === 'function') {
-                widgetWindow.addTaskToList(listName, { text: taskText, completed: false });
-            }
-        }
+    function setPoints() {
+      const points = parseInt(document.getElementById('progress-points-input').value, 10);
+      if (!isNaN(points) && typeof widgetWindow.setProgressPoints === 'function') {
+        widgetWindow.setProgressPoints(points);
+      }
+    }
+  </script>
 
-        function completeTask() {
-            const listName = document.getElementById('task-list-input').value;
-            const taskIndex = parseInt(document.getElementById('task-index-input').value, 10);
-            if (listName && !isNaN(taskIndex) && typeof widgetWindow.completeTaskInList === 'function') {
-                widgetWindow.completeTaskInList(listName, taskIndex);
-            }
-        }
+</body>
 
-        function deleteTask() {
-            const listName = document.getElementById('task-list-input').value;
-            const taskIndex = parseInt(document.getElementById('task-index-input').value, 10);
-            if (listName && !isNaN(taskIndex) && typeof widgetWindow.deleteTaskFromList === 'function') {
-                widgetWindow.deleteTaskFromList(listName, taskIndex);
-            }
-        }
-
-        function setPoints() {
-            const points = parseInt(document.getElementById('progress-points-input').value, 10);
-            if (!isNaN(points) && typeof widgetWindow.setProgressPoints === 'function') {
-                widgetWindow.setProgressPoints(points);
-            }
-        }
-    </script>
-
-</body></html>
+</html>

@@ -1,0 +1,19 @@
+
+> chat-widget-sdk@1.0.0 dev
+> node sdk.js
+
+[09:18:04.225] INFO (2636): Synced all widget JS/CSS files to .sdk
+[09:18:04.234] INFO (2636): Server is running on port 3000
+[09:18:04.245] INFO (2636): [+] /app/widget/commands.js
+[09:18:04.245] INFO (2636): [+] /app/widget/data.json
+[09:18:04.246] INFO (2636): [+] /app/widget/fields.json
+[09:18:04.246] INFO (2636): [+] /app/widget/state.js
+[09:18:04.246] INFO (2636): [+] /app/widget/ui.js
+[09:18:04.246] INFO (2636): [+] /app/widget/widget.css
+[09:18:04.248] INFO (2636): [+] /app/widget/widget.html
+[09:18:04.249] INFO (2636): [+] /app/widget/widget.js
+[09:18:04.249] INFO (2636): [+] /app/svg/.gitkeep
+[09:18:04.250] INFO (2636): [+] /app/components/alert.html
+[09:18:04.283] INFO (2636): [+] /app/components/message.html
+[09:18:04.336] INFO (2636): [~] /app/widget/widget.js
+[09:18:04.340] INFO (2636): [~] /app/widget/widget.css

@@ -30,7 +30,7 @@ function renderAllLists(lists, config) {
     if (!container) return;
 
     const existingListNames = new Set(
-        [...container.querySelectorAll(".task-list-wrapper")].map(
+        [...container.querySelectorAll(".task-list-container")].map(
             (el) => el.dataset.listName
         )
     );
@@ -40,9 +40,9 @@ function renderAllLists(lists, config) {
     for (const listName of existingListNames) {
         if (!stateListNames.has(listName)) {
             const listId = `list-${listName.replace(/\s+/g, "-")}`;
-            const listWrapper = document.getElementById(listId);
-            if (listWrapper) {
-                listWrapper.remove();
+            const listContainer = document.getElementById(listId);
+            if (listContainer) {
+                listContainer.remove();
             }
         }
     }
@@ -51,26 +51,27 @@ function renderAllLists(lists, config) {
     for (const listName in lists) {
         const listData = lists[listName];
         const listId = `list-${listName.replace(/\s+/g, "-")}`;
-        let listWrapper = document.getElementById(listId);
+        let listContainer = document.getElementById(listId);
 
-        if (!listWrapper) {
-            // Create list if it doesn't exist
-            listWrapper = document.createElement("div");
-            listWrapper.className = "task-list-wrapper";
-            listWrapper.id = listId;
-            listWrapper.dataset.listName = listName; // Add data attribute for tracking
+        if (!listContainer) {
+            // Create list container if it doesn't exist
+            listContainer = document.createElement("div");
+            listContainer.className = "task-list-container";
+            listContainer.id = listId;
+            listContainer.dataset.listName = listName;
 
             const title = document.createElement("h2");
+            title.className = "task-list-header";
             title.textContent = listData.summary || listName;
-            listWrapper.appendChild(title);
+            listContainer.appendChild(title);
 
             const ul = document.createElement("ul");
-            listWrapper.appendChild(ul);
+            ul.className = "task-list";
+            listContainer.appendChild(ul);
 
-            container.appendChild(listWrapper);
+            container.appendChild(listContainer);
         }
 
-        // Always render the list's tasks to ensure they are up-to-date
         renderList(listName, lists, config);
     }
 }
@@ -80,11 +81,11 @@ function renderList(listName, lists, config) {
     if (!listData) return;
 
     const listId = `list-${listName.replace(/\s+/g, "-")}`;
-    const listWrapper = document.getElementById(listId);
-    if (!listWrapper) return;
+    const listContainer = document.getElementById(listId);
+    if (!listContainer) return;
 
-    const ul = listWrapper.querySelector("ul");
-    const existingLis = ul.querySelectorAll("li");
+    const ul = listContainer.querySelector(".task-list");
+    const existingLis = ul.querySelectorAll(".task-item");
     const tasks = listData.tasks;
 
     // Synchronize the DOM with the state
@@ -93,14 +94,11 @@ function renderList(listName, lists, config) {
         let li = existingLis[i];
 
         if (li) {
-            // Update existing li
             updateListItemContent(li, task);
         } else {
-            // Add new li if state has more tasks than DOM
             li = createListItem(task, i);
             ul.appendChild(li);
         }
-        // Always update appearance in case status changed
         updateTaskAppearance(li, task.status || (task.completed ? "completed" : "active"));
     }
 
@@ -112,23 +110,40 @@ function renderList(listName, lists, config) {
 
 function createListItem(task, index) {
     const li = document.createElement("li");
+    li.className = "task-item";
     li.dataset.taskIndex = index;
     updateListItemContent(li, task);
     return li;
 }
 
 function updateListItemContent(li, task) {
-    let content = "";
-    if (task.username) {
-        content = `<span>${task.username}:</span> ${task.task}`;
-    } else if (task.addedBy) {
-        content = `${task.text} <sub>(by ${task.addedBy})</sub>`;
-    } else {
-        content = task.text;
+    let taskTextSpan = li.querySelector('.task-text');
+    if (!taskTextSpan) {
+        taskTextSpan = document.createElement('span');
+        taskTextSpan.className = 'task-text';
+        li.appendChild(taskTextSpan);
     }
-    // Avoid re-rendering if content is identical
-    if (li.innerHTML !== content) {
-        li.innerHTML = content;
+    const newText = task.text || task.task;
+    if (taskTextSpan.textContent !== newText) {
+        taskTextSpan.textContent = newText;
+    }
+
+    let taskUserSpan = li.querySelector('.task-user');
+    const user = task.username || task.addedBy;
+
+    if (user) {
+        if (!taskUserSpan) {
+            taskUserSpan = document.createElement('span');
+            taskUserSpan.className = 'task-user';
+            li.appendChild(taskUserSpan);
+        }
+        const newUserText = `(by ${user})`;
+        if (taskUserSpan.textContent !== newUserText) {
+            taskUserSpan.textContent = newUserText;
+        }
+    } else if (taskUserSpan) {
+        // If there's no user but the span exists, remove it
+        taskUserSpan.remove();
     }
 }
 

@@ -1,0 +1,33 @@
+{
+    "name": "chat-widget-sdk",
+    "version": "1.0.0",
+    "description": "StreamElements Widget SDK",
+    "main": "index.js",
+    "scripts": {
+        "dev": "node sdk.js",
+        "build": "npm run format && node .sdk/build.js",
+        "format": "prettier ./widget --write"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@babel/core": "^7.25.2",
+        "@babel/generator": "^7.25.0",
+        "@babel/parser": "^7.25.3",
+        "archiver": "^7.0.1",
+        "cheerio": "^1.0.0-rc.12",
+        "chokidar": "^3.6.0",
+        "cssbeautify": "^0.3.1",
+        "express": "^4.19.2",
+        "node-html-parser": "^6.1.13",
+        "pino": "^9.3.2",
+        "pino-pretty": "^11.2.2",
+        "prettier": "^3.3.3",
+        "prettier-eslint": "^16.3.0",
+        "zip-a-folder": "^3.1.7"
+    },
+    "devDependencies": {
+        "globals": "^15.9.0",
+        "typescript": "^5.5.4"
+    }
+}

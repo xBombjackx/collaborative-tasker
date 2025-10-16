@@ -1,0 +1,18 @@
+{
+    "eventsLimit": 999,
+    "includeFollowers": "yes",
+    "includeRedemptions": "yes",
+    "includeHosts": "yes",
+    "minHost": 1,
+    "includeRaids": "yes",
+    "minRaid": 1,
+    "includeSubs": "yes",
+    "includeTips": "yes",
+    "minTip": 1,
+    "includeCheers": "yes",
+    "minCheer": 1,
+    "hideAfter": 999,
+    "hideCommands": "yes",
+    "ignoredUsers": "StreamElements,OtherBot",
+    "testMessage": "Test message"
+}

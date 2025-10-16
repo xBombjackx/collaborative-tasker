@@ -98,8 +98,8 @@ function removeTask(listName, taskIndex) {
 
 function addPendingTask(username, taskText) {
     const defaultListName = getConfig().defaultListName || "Viewers";
-    const existingTask = pendingTasks.some(t => t.username === username) ||
-        (lists[defaultListName] && lists[defaultListName].tasks.some(t => t.username === username));
+    const existingTask = pendingTasks.some(t => t.username.toLowerCase() === username.toLowerCase()) ||
+        (lists[defaultListName] && lists[defaultListName].tasks.some(t => t.username && t.username.toLowerCase() === username.toLowerCase()));
     if (existingTask) {
         return { success: false, reason: "existing" };
     }

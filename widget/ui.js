@@ -28,23 +28,50 @@ function updateProgressBar(progressPoints, config) {
 function renderAllLists(lists, config) {
     const container = document.getElementById("task-lists-container");
     if (!container) return;
-    container.innerHTML = ""; // Clear existing lists
 
+    const existingListNames = new Set(
+        [...container.querySelectorAll(".task-list-wrapper")].map(
+            (el) => el.dataset.listName
+        )
+    );
+    const stateListNames = new Set(Object.keys(lists));
+
+    // Remove lists that are no longer in the state
+    for (const listName of existingListNames) {
+        if (!stateListNames.has(listName)) {
+            const listId = `list-${listName.replace(/\s+/g, "-")}`;
+            const listWrapper = document.getElementById(listId);
+            if (listWrapper) {
+                listWrapper.remove();
+            }
+        }
+    }
+
+    // Add or update lists that are in the state
     for (const listName in lists) {
         const listData = lists[listName];
-        const listWrapper = document.createElement("div");
-        listWrapper.className = "task-list-wrapper";
-        listWrapper.id = `list-${listName.replace(/\s+/g, "-")}`;
+        const listId = `list-${listName.replace(/\s+/g, "-")}`;
+        let listWrapper = document.getElementById(listId);
 
-        const title = document.createElement("h2");
-        title.textContent = listData.summary || listName;
-        listWrapper.appendChild(title);
+        if (!listWrapper) {
+            // Create list if it doesn't exist
+            listWrapper = document.createElement("div");
+            listWrapper.className = "task-list-wrapper";
+            listWrapper.id = listId;
+            listWrapper.dataset.listName = listName; // Add data attribute for tracking
 
-        const ul = document.createElement("ul");
-        listWrapper.appendChild(ul);
+            const title = document.createElement("h2");
+            title.textContent = listData.summary || listName;
+            listWrapper.appendChild(title);
 
-        container.appendChild(listWrapper);
-        renderList(listName, lists, config); // Render the tasks for the newly created list structure
+            const ul = document.createElement("ul");
+            listWrapper.appendChild(ul);
+
+            container.appendChild(listWrapper);
+        }
+
+        // Always render the list's tasks to ensure they are up-to-date
+        renderList(listName, lists, config);
     }
 }
 

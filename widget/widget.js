@@ -219,12 +219,10 @@ window.CST_API = {
   emulateMessage: (message, username = "TestUser", tags = { broadcaster: true }) => {
     const mockEvent = {
       listener: "message",
-      event: {
-        data: {
-          text: message,
-          displayName: username,
-          tags: tags
-        }
+      data: {
+        text: message,
+        displayName: username,
+        tags: tags
       }
     };
     onEventReceived({

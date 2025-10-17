@@ -37,6 +37,11 @@ function handleMessage(event, showFeedback) {
         case "!help":
             handleHelp(showFeedback);
             break;
+        case "!addlist":
+            if (isMod) {
+                handleAddList(args.join(" "), showFeedback);
+            }
+            break;
     }
 }
 
@@ -187,8 +192,21 @@ function handleUpdateStatus(requestor, status, targetUser, isMod, showFeedback) 
 
 function handleHelp(showFeedback) {
     const viewerCommands = "Viewer: !task <desc>, !status <complete|pause|resume>";
-    const modCommands = "Mod: !approve <user>, !reject <user>, !status <status> <user>, !addtask <list> <desc>";
+    const modCommands = "Mod: !addlist <name>, !approve <user>, !reject <user>, !status <status> <user>, !addtask <list> <desc>";
     showFeedback(`CST Commands | ${viewerCommands} | ${modCommands}`);
+}
+
+function handleAddList(listName, showFeedback) {
+    if (!listName) {
+        showFeedback("Usage: !addlist <ListName>");
+        return;
+    }
+    if (State.addList(listName)) {
+        UI.renderAllLists(State.getLists(), State.getConfig());
+        showFeedback(`New list "${listName}" has been created.`);
+    } else {
+        showFeedback(`Error: List "${listName}" already exists.`);
+    }
 }
 
 export {

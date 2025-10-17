@@ -244,7 +244,7 @@
     iframe.onload = () => {
         widgetWindow = iframe.contentWindow;
         console.log("Widget Iframe Loaded.");
-        setInterval(refreshUiState, 1000);
+        window.refreshInterval = setInterval(refreshUiState, 1000);
         setupEventListeners();
     };
 
@@ -493,14 +493,15 @@
 
                     let content;
                     const strong = document.createElement('strong');
+                    const taskDescription = task.task || task.text;
                     if (task.username) {
                         strong.textContent = task.username;
                         content = document.createElement('span');
                         content.appendChild(strong);
-                        content.append(`: ${task.text}`);
+                        content.append(`: ${taskDescription}`);
                     } else {
                         content = document.createElement('span');
-                        content.textContent = task.text;
+                        content.textContent = taskDescription;
                     }
 
                     if (task.completed) {

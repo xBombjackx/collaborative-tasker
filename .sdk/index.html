@@ -221,8 +221,16 @@
 
     <div class="control-group">
         <h2>Widget State</h2>
-        <button id="show-widget-state-button" class="full-width">Get and Show Widget State</button>
+        <div class="form-grid">
+            <button id="show-widget-state-button">Get and Show Widget State</button>
+            <button id="reset-all-data-button" class="danger">Reset All Data</button>
+        </div>
         <pre id="widget-state-display"></pre>
+    </div>
+
+    <div class="control-group">
+        <h2>Floating Lists View</h2>
+        <div id="floating-lists-container"></div>
     </div>
 </div>
 
@@ -246,6 +254,7 @@
         getEl('add-pending-task-button').addEventListener('click', addPending);
         getEl('set-points-button').addEventListener('click', setPoints);
         getEl('show-widget-state-button').addEventListener('click', showWidgetState);
+        getEl('reset-all-data-button').addEventListener('click', resetAllData);
         getEl('emulate-command-button').addEventListener('click', () => emulateCommand());
 
         // Use event delegation for dynamically created buttons
@@ -326,12 +335,25 @@
         }
     }
 
+    function resetAllData() {
+        if (confirm("Are you sure you want to reset all widget data? This cannot be undone.")) {
+            widgetWindow.CST_API?.resetAllData();
+            // Clear the state display
+            getEl('widget-state-display').textContent = '';
+        }
+    }
+
     function handlePendingListClick(event) {
         const button = event.target.closest('button');
         if (!button) return;
         const command = button.dataset.command;
         if (command) {
+            // Set role to mod for approve/reject actions
+            const originalRole = getEl('command-role-select').value;
+            getEl('command-role-select').value = 'mod';
             emulateCommand(command);
+            // Restore original role
+            getEl('command-role-select').value = originalRole;
         }
     }
 
@@ -358,6 +380,8 @@
     function refreshUiState() {
         const state = widgetWindow.CST_API?.getWidgetState();
         if (!state) return;
+
+        refreshFloatingLists(state);
 
         // Refresh pending tasks
         const pendingList = getEl('pending-tasks-list');
@@ -425,6 +449,87 @@
             });
         }
     }
+
+    function refreshFloatingLists(state) {
+        const container = getEl('floating-lists-container');
+        container.innerHTML = ''; // Clear previous state
+
+        if (!state || !state.lists || Object.keys(state.lists).length === 0) {
+            container.innerHTML = '<p>No lists created yet.</p>';
+            return;
+        }
+
+        for (const listName in state.lists) {
+            const list = state.lists[listName];
+            const listEl = document.createElement('div');
+            listEl.className = 'floating-list';
+
+            const title = document.createElement('h3');
+            title.textContent = list.summary || listName;
+            listEl.appendChild(title);
+
+            const ul = document.createElement('ul');
+            if (list.tasks.length === 0) {
+                ul.innerHTML = '<li>No tasks in this list.</li>';
+            } else {
+                list.tasks.forEach(task => {
+                    const li = document.createElement('li');
+                    let taskText = task.text;
+                    if (task.username) {
+                        taskText = `<strong>${task.username}</strong>: ${taskText}`;
+                    }
+                    if (task.completed) {
+                        taskText = `<s>${taskText}</s>`;
+                    } else if (task.status === 'paused') {
+                        taskText += ' <em>(Paused)</em>';
+                    } else if (task.status === 'offline') {
+                        taskText += ' <em>(Offline)</em>';
+                    }
+                    li.innerHTML = taskText;
+                    ul.appendChild(li);
+                });
+            }
+            listEl.appendChild(ul);
+            container.appendChild(listEl);
+        }
+    }
 </script>
+
+<style>
+.floating-list {
+    background-color: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 16px;
+}
+.floating-list h3 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+.floating-list ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+}
+.floating-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+.floating-list li:last-child {
+    border-bottom: none;
+}
+.floating-list li s {
+    color: var(--secondary-text);
+    opacity: 0.7;
+}
+.floating-list li em {
+    color: #f59e0b; /* Amber color for status */
+    font-style: normal;
+}
+</style>
 
 </body></html>

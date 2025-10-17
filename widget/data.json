@@ -14,5 +14,6 @@
     "hideAfter": 999,
     "hideCommands": "yes",
     "ignoredUsers": "StreamElements,OtherBot",
-    "testMessage": "Test message"
+    "testMessage": "Test message",
+    "theme": "theme-1"
 }

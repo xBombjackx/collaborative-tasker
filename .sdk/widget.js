@@ -45,8 +45,20 @@ function onWidgetLoad(obj) {
   // --- Configuration Loading ---
   const config = State.setConfig(fieldData);
 
-  // --- Apply Customizations ---
-  applyCustomizations(fieldData);
+  // --- Apply Theme ---
+  UI.applyTheme(fieldData.theme || "theme-1");
+
+  // --- Theme Selector ---
+  const themeSelect = document.getElementById("theme-select");
+  if (themeSelect) {
+    themeSelect.value = fieldData.theme || "theme-1";
+    themeSelect.addEventListener("change", (event) => {
+      const newTheme = event.target.value;
+      fieldData.theme = newTheme;
+      UI.applyTheme(newTheme);
+      SE_API.store.set("collaborative-tasker-data", { ...State.getRawState(), fieldData });
+    });
+  }
 
   // --- Data Loading ---
   State.loadData().then(data => {
@@ -77,15 +89,6 @@ function onLegacyEventReceived(e) {
   // Fallback for older test environments using postMessage
   if (e.data.type === "event:received") {
     onEventReceived(e.data);
-  }
-}
-function applyCustomizations(fieldData) {
-  const mainContainer = document.getElementById("main-container");
-  if (mainContainer) {
-    // Remove any existing theme classes
-    mainContainer.className = "main-container";
-    // Add the selected theme class
-    mainContainer.classList.add(fieldData.theme || "theme-1");
   }
 }
 function initializeDefaultState(config) {

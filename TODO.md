@@ -6,6 +6,10 @@ This document outlines the remaining tasks, bugs, and features for the Collabora
 
 ## High Priority: Core Functionality & Bugs
 
+-   [ ] **Critical Bug: Moderator Actions Failing in Test UI**:
+    -   The `handlePendingListClick` function in `.sdk/index.html` does not set the command role to 'mod' before emulating `!approve` or `!reject`.
+    -   **Action:** Modify `handlePendingListClick` to set the role to 'mod' to ensure moderators can correctly manage pending tasks. This is essential for testing core functionality.
+
 -   [ ] **Make Widget Fully Configurable via `fieldData`**:
     -   The `onWidgetLoad` function in `widget.js` correctly receives `fieldData`, but the `setConfig` function in `state.js` uses hardcoded defaults for several key values (e.g., tier thresholds, viewer task limit).
     -   **Action:** Modify `state.js` to prioritize values from `fieldData` and only fall back to defaults if the fields are not provided. This is critical for customization.
@@ -43,9 +47,10 @@ This document outlines the remaining tasks, bugs, and features for the Collabora
     -   The current implementation iterates through all tasks every 60 seconds. This is inefficient for large task lists.
     -   **Action:** Investigate a more performant approach. For example, only check users who haven't been seen in the last `N` minutes, rather than iterating the entire user list every time.
 
--   [ ] **Add Session Reset Logic**:
+-   [x] **Add Session Reset Logic**:
     -   The `design.md` requires a manual "reset session" button in the widget configuration.
     -   **Action:** Add a button to the test UI and a corresponding function in the `CST_API` that clears all tasks and progress points from storage and re-initializes the widget to its default state.
+    -   **Update:** This has been implemented. The test UI now features a "Reset All Data" button and a "Floating Lists View" for improved testing.
 
 -   [ ] **Channel Points Integration (Phase 2)**:
     -   Plan for the Phase 2 feature of allowing viewers to use channel points to bypass the moderation queue. This requires research into the StreamElements API for channel point redemptions.

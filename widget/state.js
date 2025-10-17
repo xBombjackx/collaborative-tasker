@@ -136,6 +136,16 @@ function setProgress(points) {
     saveData();
 }
 
+function resetAllData() {
+    lists = {};
+    pendingTasks = [];
+    progressPoints = 0;
+    saveData();
+    console.log("All widget data has been reset.");
+    // After resetting, the main widget logic will re-initialize with defaults on next load.
+    return true;
+}
+
 function saveData() {
     const dataToStore = {
         lists,
@@ -169,6 +179,7 @@ export {
     removePendingTask,
     incrementProgress,
     setProgress,
+    resetAllData,
     saveData,
     loadData,
 };

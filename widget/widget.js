@@ -228,5 +228,16 @@ window.CST_API = {
     onEventReceived({
       detail: mockEvent
     });
+  },
+  resetAllData: () => {
+    if (State.resetAllData()) {
+        // Re-render everything to reflect the cleared state
+        UI.renderAllLists(State.getLists(), State.getConfig());
+        UI.updateProgressBar(State.getProgressPoints(), State.getConfig());
+
+        // A simple way to trigger re-initialization with defaults
+        // This simulates a fresh load without a full page reload
+        mockWidgetLoad();
+    }
   }
 };

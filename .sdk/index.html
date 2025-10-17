@@ -261,6 +261,7 @@
         // Use event delegation for dynamically created buttons
         getEl('pending-tasks-list').addEventListener('click', handlePendingListClick);
         getEl('task-management-list').addEventListener('click', handleManagementListClick);
+        getEl('floating-lists-container').addEventListener('click', handleFloatingListClick);
     }
 
     function getRoleTags(role) {
@@ -518,11 +519,37 @@
                         li.appendChild(em);
                     }
 
+                    // Add a complete button for the viewer
+                    const currentUser = getEl('command-username-input').value;
+                    if (task.username && task.username.toLowerCase() === currentUser.toLowerCase() && task.status !== 'completed') {
+                        const completeButton = document.createElement('button');
+                        completeButton.textContent = 'Complete';
+                        completeButton.dataset.action = 'complete-viewer-task';
+                        completeButton.dataset.username = task.username;
+                        li.appendChild(completeButton);
+                    }
+
                     ul.appendChild(li);
                 });
             }
             listEl.appendChild(ul);
             container.appendChild(listEl);
+        }
+    }
+
+    function handleFloatingListClick(event) {
+        const button = event.target.closest('button');
+        if (!button) return;
+        const { action, username } = button.dataset;
+
+        if (action === 'complete-viewer-task') {
+            const originalRole = getEl('command-role-select').value;
+            const originalUser = getEl('command-username-input').value;
+            getEl('command-role-select').value = 'viewer';
+            getEl('command-username-input').value = username;
+            emulateCommand(`!status complete`);
+            getEl('command-role-select').value = originalRole;
+            getEl('command-username-input').value = originalUser;
         }
     }
 </script>

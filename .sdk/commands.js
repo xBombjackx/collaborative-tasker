@@ -167,6 +167,7 @@ function handleUpdateStatus(requestor, status, targetUser, isMod, showFeedback) 
         case "done":
             if (task.status === "completed") return; // Avoid re-completing
             newStatus = "completed";
+            task.completed = true; // Set the completed flag
             const newProgress = State.incrementProgress();
             UI.updateProgressBar(newProgress, State.getConfig());
             feedbackMsg = `@${username}'s task is now complete! Great job!`;

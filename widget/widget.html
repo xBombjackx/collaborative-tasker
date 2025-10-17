@@ -1,33 +1,40 @@
 <!-- IMPORT ALL YOUR LIBRARIES AND STYLESHEETS HERE -->
+
 <head>
     <script type="text/javascript" src="https://livejs.com/live.js"></script>
+    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind Config to use our CSS Variables -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': 'var(--first-color)',
+                        'secondary': 'var(--second-color)',
+                        'tertiary': 'var(--third-color)',
+                        'quaternary': 'var(--fourth-color)',
+                    },
+                },
+            },
+        };
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/animejs@3.0.1/lib/anime.min.js"></script>
     <link href="widget.css" rel="stylesheet" />
     <link href="themes.css" rel="stylesheet" />
     <script type="module" src="widget.js"></script>
 </head>
 
-<!-- MAIN CONTAINER THAT WE WILL ATTACH MESSAGES TO, YOU SHOULDNT BE ADDING ANYTHING IN HERE -->
-<div class="main-container" id="main-container">
+<div class="main-container theme-3" id="main-container">
     <div id="task-lists-container">
         <!-- Task lists will be dynamically rendered here -->
     </div>
-    <div class="theme-selector">
-        <label for="theme-select">Theme:</label>
-        <select id="theme-select">
-            <option value="theme-1">Theme 1</option>
-            <option value="theme-2">Theme 2</option>
-            <option value="theme-3">Theme 3</option>
-            <option value="theme-4">Theme 4</option>
-            <option value="theme-5">Theme 5</option>
-        </select>
-    </div>
-    <div class="progress-reward-system">
-        <h3>Progress</h3>
-        <div class="progress-bar-container">
-            <div class="progress-bar" id="progress-bar"></div>
+    <div
+        class="progress-reward-system p-4 rounded-xl shadow-lg mt-4 bg-quaternary/80 backdrop-blur-sm border border-white/10">
+        <h3 class="font-bold text-lg mb-2 text-primary">Progress</h3>
+        <div class="progress-bar-container bg-tertiary/50 rounded-full overflow-hidden">
+            <div class="progress-bar bg-secondary h-4 rounded-full" id="progress-bar" style="width: 0%;"></div>
         </div>
-        <div class="progress-text" id="progress-text">0/12</div>
+        <div class="progress-text text-primary/80 text-right font-mono mt-1" id="progress-text">0/12</div>
     </div>
 </div>

@@ -80,10 +80,13 @@ function onLegacyEventReceived(e) {
   }
 }
 function applyCustomizations(fieldData) {
-  const root = document.documentElement;
-  root.style.setProperty("--background-color", fieldData.backgroundColor || '#1E1E1E');
-  root.style.setProperty("--text-color", fieldData.textColor || '#FFFFFF');
-  root.style.setProperty("--progress-bar-color", fieldData.progressBarColor || '#4CAF50');
+  const mainContainer = document.getElementById("main-container");
+  if (mainContainer) {
+    // Remove any existing theme classes
+    mainContainer.className = "main-container";
+    // Add the selected theme class
+    mainContainer.classList.add(fieldData.theme || "theme-1");
+  }
 }
 function initializeDefaultState(config) {
   const defaultListName = config.defaultListName || "Viewers";
@@ -157,9 +160,7 @@ function mockWidgetLoad() {
         tier2Threshold: 10,
         tier3Threshold: 15,
         viewerTaskLimit: 5,
-        backgroundColor: "#222",
-        textColor: "#eee",
-        progressBarColor: "purple"
+        theme: "theme-1"
       }
     }
   }));

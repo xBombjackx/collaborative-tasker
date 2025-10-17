@@ -35,22 +35,17 @@
         "value": "",
         "group": "Streamer Tasks"
     },
-    "backgroundColor": {
-        "type": "colorpicker",
-        "label": "Background Color",
-        "value": "rgba(30, 30, 30, 0.8)",
-        "group": "Customization"
-    },
-    "textColor": {
-        "type": "colorpicker",
-        "label": "Text Color",
-        "value": "#ffffff",
-        "group": "Customization"
-    },
-    "progressBarColor": {
-        "type": "colorpicker",
-        "label": "Progress Bar Color",
-        "value": "#4caf50",
-        "group": "Customization"
+    "theme": {
+        "type": "dropdown",
+        "label": "Theme",
+        "value": "theme-1",
+        "group": "Customization",
+        "options": {
+            "theme-1": "Default",
+            "theme-2": "Ocean",
+            "theme-3": "Sunset",
+            "theme-4": "Pastel",
+            "theme-5": "Midnight"
+        }
     }
 }

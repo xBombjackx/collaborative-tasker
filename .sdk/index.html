@@ -387,11 +387,19 @@
         const pendingList = getEl('pending-tasks-list');
         pendingList.innerHTML = '';
         if (state.pendingTasks.length === 0) {
-            pendingList.innerHTML = '<li>No pending tasks.</li>';
+            const li = document.createElement('li');
+            li.textContent = 'No pending tasks.';
+            pendingList.appendChild(li);
         } else {
             state.pendingTasks.forEach(task => {
                 const li = document.createElement('li');
-                li.innerHTML = `<span><strong>${task.username}</strong>: ${task.task}</span>`;
+                const textSpan = document.createElement('span');
+                const userStrong = document.createElement('strong');
+                userStrong.textContent = task.username;
+                textSpan.appendChild(userStrong);
+                textSpan.append(`: ${task.task}`);
+                li.appendChild(textSpan);
+
                 const actions = document.createElement('div');
                 actions.className = 'actions';
                 actions.appendChild(createButton('Approve', `!approve ${task.username}`));
@@ -425,7 +433,10 @@
         if (selectedList && state.lists[selectedList]) {
             state.lists[selectedList].tasks.forEach((task, index) => {
                 const li = document.createElement('li');
-                li.innerHTML = `<span>${task.text}</span>`;
+                const textSpan = document.createElement('span');
+                textSpan.textContent = task.text;
+                li.appendChild(textSpan);
+
                 const actions = document.createElement('div');
                 actions.className = 'actions';
 
@@ -455,7 +466,9 @@
         container.innerHTML = ''; // Clear previous state
 
         if (!state || !state.lists || Object.keys(state.lists).length === 0) {
-            container.innerHTML = '<p>No lists created yet.</p>';
+             const p = document.createElement('p');
+             p.textContent = 'No lists created yet.';
+             container.appendChild(p);
             return;
         }
 
@@ -470,22 +483,39 @@
 
             const ul = document.createElement('ul');
             if (list.tasks.length === 0) {
-                ul.innerHTML = '<li>No tasks in this list.</li>';
+                const li = document.createElement('li');
+                li.textContent = 'No tasks in this list.';
+                ul.appendChild(li);
             } else {
                 list.tasks.forEach(task => {
                     const li = document.createElement('li');
-                    let taskText = task.text;
+
+                    let content;
+                    const strong = document.createElement('strong');
                     if (task.username) {
-                        taskText = `<strong>${task.username}</strong>: ${taskText}`;
+                        strong.textContent = task.username;
+                        content = document.createElement('span');
+                        content.appendChild(strong);
+                        content.append(`: ${task.text}`);
+                    } else {
+                        content = document.createElement('span');
+                        content.textContent = task.text;
                     }
+
                     if (task.completed) {
-                        taskText = `<s>${taskText}</s>`;
-                    } else if (task.status === 'paused') {
-                        taskText += ' <em>(Paused)</em>';
-                    } else if (task.status === 'offline') {
-                        taskText += ' <em>(Offline)</em>';
+                        const s = document.createElement('s');
+                        s.appendChild(content);
+                        li.appendChild(s);
+                    } else {
+                        li.appendChild(content);
                     }
-                    li.innerHTML = taskText;
+
+                    if (task.status === 'paused' || task.status === 'offline') {
+                        const em = document.createElement('em');
+                        em.textContent = ` (${task.status.charAt(0).toUpperCase() + task.status.slice(1)})`;
+                        li.appendChild(em);
+                    }
+
                     ul.appendChild(li);
                 });
             }

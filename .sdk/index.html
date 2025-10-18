@@ -285,10 +285,10 @@
         return { mod: role === 'mod', broadcaster: role === 'broadcaster' };
     }
 
-    function emulateCommand(commandOverride) {
+    function emulateCommand(commandOverride, roleOverride) {
         const username = getEl('command-username-input').value;
         const command = commandOverride || getEl('command-input').value;
-        const role = getEl('command-role-select').value;
+        const role = roleOverride || getEl('command-role-select').value;
 
         if (!username || !command) {
             alert("Username and command text are required.");
@@ -367,12 +367,8 @@
         if (!button) return;
         const command = button.dataset.command;
         if (command) {
-            // Set role to mod for approve/reject actions
-            const originalRole = getEl('command-role-select').value;
-            getEl('command-role-select').value = 'mod';
-            emulateCommand(command);
-            // Restore original role
-            getEl('command-role-select').value = originalRole;
+            // Emulate the command with 'mod' role directly
+            emulateCommand(command, 'mod');
         }
     }
 

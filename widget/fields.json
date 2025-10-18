@@ -35,6 +35,30 @@
         "value": "",
         "group": "Streamer Tasks"
     },
+    "tier1Threshold": {
+        "type": "number",
+        "label": "Tier 1 Points Threshold",
+        "value": 3,
+        "group": "Progress & Limits"
+    },
+    "tier2Threshold": {
+        "type": "number",
+        "label": "Tier 2 Points Threshold",
+        "value": 7,
+        "group": "Progress & Limits"
+    },
+    "tier3Threshold": {
+        "type": "number",
+        "label": "Tier 3 Points Threshold",
+        "value": 12,
+        "group": "Progress & Limits"
+    },
+    "viewerTaskLimit": {
+        "type": "number",
+        "label": "Active Viewer Task Limit",
+        "value": 3,
+        "group": "Progress & Limits"
+    },
     "theme": {
         "type": "dropdown",
         "label": "Theme",

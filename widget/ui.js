@@ -188,10 +188,29 @@ function triggerConfetti() {
 }
 
 
+function applyTheme(theme) {
+    const mainContainer = document.getElementById("main-container");
+    if (mainContainer) {
+        // Remove any existing theme classes
+        const themePrefix = "theme-";
+        const classesToRemove = [];
+        for (let i = 0; i < mainContainer.classList.length; i++) {
+            if (mainContainer.classList[i].startsWith(themePrefix)) {
+                classesToRemove.push(mainContainer.classList[i]);
+            }
+        }
+        mainContainer.classList.remove(...classesToRemove);
+
+        // Add the new theme class
+        mainContainer.classList.add(theme);
+    }
+}
+
 export {
     updateProgressBar,
     renderAllLists,
     renderList,
     updateTaskAppearance,
-    triggerConfetti
+    triggerConfetti,
+    applyTheme
 };

@@ -1,8 +1,8 @@
 .main-container {
-  background-color: var(--first-color);
-  color: var(--fourth-color);
   display: flex;
   flex-direction: column;
+  /* Let the body control the background */
+  background-color: transparent;
   height: 100%;
   width: 100%;
   padding: 20px;
@@ -14,41 +14,22 @@
   opacity: 0.6;
 }
 
-.progress-reward-system {
-  text-align: center;
-}
-
-.progress-bar-container {
-  width: 100%;
-  background-color: var(--third-color);
-  border-radius: 5px;
-  margin: 10px 0;
-}
-
 .progress-bar {
-  width: 0%;
-  height: 20px;
-  background-color: var(--second-color);
-  border-radius: 5px;
+  /* Tailwind handles the styling, but we keep the transition */
   transition: width 0.5s ease-in-out;
-}
-
-.progress-text {
-  font-size: 1.2em;
-  font-weight: bold;
 }
 
 .tier-1-complete {
   background-color: #ffeb3b;
-    /* Yellow */
+  /* Yellow */
 }
 
 .tier-2-complete {
   background-color: #ff9800;
-    /* Orange */
+  /* Orange */
 }
 
 .tier-3-complete {
   background-color: #f44336;
-    /* Red */
+  /* Red */
 }

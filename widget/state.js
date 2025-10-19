@@ -33,7 +33,7 @@ function setConfig(fieldData) {
     const VIEWER_LIMIT_DEFAULT = 3;
 
     config = {
-        sessionSummary: fieldData.sessionSummary || "Session Goals",
+        sessionSummary: fieldData.sessionSummary ?? "Session Goals",
         tierThresholds: {
             tier1: fieldData.tier1Threshold ?? TIER_1_DEFAULT,
             tier2: fieldData.tier2Threshold ?? TIER_2_DEFAULT,
@@ -74,21 +74,21 @@ function addList(listName, summary = "") {
         summary: summary || listName,
         lastChecked: 0 // Initialize timestamp for offline check optimization
     };
-    saveData();
+    debouncedSaveData();
     return true;
 }
 
 function deleteList(listName) {
     if (!lists[listName]) return false;
     delete lists[listName];
-    saveData();
+    debouncedSaveData();
     return true;
 }
 
 function addTask(listName, taskData) {
     if (!lists[listName]) return false;
     lists[listName].tasks.push(taskData);
-    saveData();
+    debouncedSaveData();
     return true;
 }
 
@@ -96,14 +96,14 @@ function updateTask(listName, taskIndex, updates) {
     const task = lists[listName]?.tasks[taskIndex];
     if (!task) return false;
     Object.assign(task, updates);
-    saveData();
+    debouncedSaveData();
     return true;
 }
 
 function removeTask(listName, taskIndex) {
     if (!lists[listName]?.tasks[taskIndex]) return false;
     lists[listName].tasks.splice(taskIndex, 1);
-    saveData();
+    debouncedSaveData();
     return true;
 }
 
@@ -118,7 +118,7 @@ function addPendingTask(username, taskText) {
         return { success: false, reason: "full" };
     }
     pendingTasks.push({ username, task: taskText, status: "pending" });
-    saveData();
+    debouncedSaveData();
     return { success: true };
 }
 
@@ -130,7 +130,7 @@ function removePendingTask(username) {
     const initialLength = pendingTasks.length;
     pendingTasks = pendingTasks.filter(t => t.username.toLowerCase() !== username.toLowerCase());
     if (pendingTasks.length < initialLength) {
-        saveData();
+        debouncedSaveData();
         return true;
     }
     return false;
@@ -138,24 +138,26 @@ function removePendingTask(username) {
 
 function incrementProgress() {
     progressPoints++;
-    saveData();
+    debouncedSaveData();
     return progressPoints;
 }
 
 function setProgress(points) {
     progressPoints = points;
-    saveData();
+    debouncedSaveData();
 }
 
 function resetAllData() {
     lists = {};
     pendingTasks = [];
     progressPoints = 0;
-    saveData();
+    debouncedSaveData();
     console.log("All widget data has been reset.");
     // After resetting, the main widget logic will re-initialize with defaults on next load.
     return true;
 }
+
+import { debouncedSaveData } from './widget.js';
 
 function saveData() {
     const dataToStore = {

@@ -460,7 +460,11 @@
                 const taskDescription = task.task || task.text;
                 const textSpan = document.createElement('span');
                 if (task.username) {
-                    textSpan.innerHTML = `<strong>${task.username}</strong>: ${taskDescription}`;
+                    textSpan.innerHTML = ''; // Clear existing content
+                    const strongEl = document.createElement('strong');
+                    strongEl.textContent = task.username;
+                    textSpan.appendChild(strongEl);
+                    textSpan.appendChild(document.createTextNode(`: ${taskDescription}`));
                 } else {
                     textSpan.textContent = taskDescription;
                 }

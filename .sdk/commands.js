@@ -1,6 +1,7 @@
 // widget/commands.js
 import * as State from './state.js';
 import * as UI from './ui.js';
+import { debouncedSaveData } from './widget.js';
 
 function handleMessage(event, showFeedback) {
     const message = event.data.text.trim();
@@ -60,7 +61,7 @@ function updateUserLastSeen(username) {
         if (task.status === "offline") {
             task.status = "active";
             UI.renderList(listName, State.getLists(), State.getConfig());
-            State.saveData();
+            debouncedSaveData();
         }
     }
 }
@@ -204,7 +205,7 @@ function handleUpdateStatus(requestor, status, targetUser, isMod, showFeedback) 
     }
 
     task.status = newStatus;
-    State.saveData();
+    debouncedSaveData();
     UI.renderList(listName, State.getLists(), State.getConfig());
     showFeedback(feedbackMsg);
 }
@@ -254,7 +255,7 @@ function handleDoneTask(username, showFeedback) {
     const newProgress = State.incrementProgress();
     UI.updateProgressBar(newProgress, State.getConfig());
     UI.renderList(listName, State.getLists(), State.getConfig());
-    State.saveData();
+    debouncedSaveData();
 
     showFeedback(`Task for @${username} has been marked as complete.`);
 }

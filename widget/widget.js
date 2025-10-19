@@ -23,6 +23,22 @@ import * as UI from './ui.js';
 import { handleMessage } from './commands.js';
 import { addAlert, addMessage } from './generated-components.js';
 
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+const debouncedSaveData = debounce(State.saveData, 1000);
+
+export { debouncedSaveData };
+
 document.addEventListener("DOMContentLoaded", function () {
   // This is the main entry point for the widget.
   // It sets up event listeners and initializes the widget.
@@ -124,7 +140,7 @@ function initializeDefaultState(config) {
     };
 
     State.setInitialState(defaultState);
-    State.saveData();
+    debouncedSaveData();
 }
 function checkOfflineUsers() {
     const config = State.getConfig();
@@ -158,7 +174,7 @@ function checkOfflineUsers() {
     }
 
     if (overallChanged) {
-        State.saveData();
+        debouncedSaveData();
     }
 }
 function showFeedback(message, isError = false) {

@@ -32,7 +32,10 @@
     <div
         class="progress-reward-system p-4 rounded-xl shadow-lg mt-4 bg-quaternary/80 backdrop-blur-sm border border-white/10">
         <h3 class="font-bold text-lg mb-2 text-primary">Progress</h3>
-        <div class="progress-bar-container bg-tertiary/50 rounded-full overflow-hidden">
+        <div class="progress-bar-container bg-tertiary/50 rounded-full overflow-hidden relative">
+            <div id="tier-1-segment" class="tier-segment"></div>
+            <div id="tier-2-segment" class="tier-segment"></div>
+            <div id="tier-3-segment" class="tier-segment"></div>
             <div class="progress-bar bg-secondary h-4 rounded-full" id="progress-bar" style="width: 0%;"></div>
         </div>
         <div class="progress-text text-primary/80 text-right font-mono mt-1" id="progress-text">0/12</div>

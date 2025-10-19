@@ -1,35 +1,18 @@
-.main-container {
-  display: flex;
-  flex-direction: column;
-  /* Let the body control the background */
-  background-color: transparent;
-  height: 100%;
-  width: 100%;
-  padding: 20px;
-  box-sizing: border-box;
+.confetti {
+  position: fixed;
+ /* Use fixed to cover the whole viewport */
+  width: 10px;
+  height: 10px;
+  background-color: #f00;
+ /* This will be overridden by inline style */
+  top: -20px;
+  opacity: 0.8;
+  z-index: 9999;
+ /* Ensure it's on top */
 }
 
-.completed {
-  text-decoration: line-through !important;
-  opacity: 0.6;
-}
-
-.progress-bar {
-  /* Tailwind handles the styling, but we keep the transition */
-  transition: width 0.5s ease-in-out;
-}
-
-.tier-1-complete {
-  background-color: #ffeb3b;
-  /* Yellow */
-}
-
-.tier-2-complete {
-  background-color: #ff9800;
-  /* Orange */
-}
-
-.tier-3-complete {
-  background-color: #f44336;
-  /* Red */
+.tier-segment.flash {
+    background-color: rgba(255, 255, 255, 0.3);
+    animation: flash-anim 0.7s ease-out;
+    z-index: 1;
 }

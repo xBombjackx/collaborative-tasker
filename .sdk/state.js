@@ -27,16 +27,26 @@ function setInitialState(initialData) {
 }
 
 function setConfig(fieldData) {
+    const TIER_1_DEFAULT = 3;
+    const TIER_2_DEFAULT = 7;
+    const TIER_3_DEFAULT = 12;
+    const VIEWER_LIMIT_DEFAULT = 3;
+
     config = {
-        sessionSummary: fieldData.sessionSummary || "Session Goals",
+        sessionSummary: fieldData.sessionSummary !== undefined && fieldData.sessionSummary !== '' ? fieldData.sessionSummary : "Session Goals",
         tierThresholds: {
-            tier1: fieldData.tier1Threshold || 3,
-            tier2: fieldData.tier2Threshold || 7,
-            tier3: fieldData.tier3Threshold || 12,
+            tier1: fieldData.tier1Threshold !== undefined && fieldData.tier1Threshold !== null ? fieldData.tier1Threshold : TIER_1_DEFAULT,
+            tier2: fieldData.tier2Threshold !== undefined && fieldData.tier2Threshold !== null ? fieldData.tier2Threshold : TIER_2_DEFAULT,
+            tier3: fieldData.tier3Threshold !== undefined && fieldData.tier3Threshold !== null ? fieldData.tier3Threshold : TIER_3_DEFAULT,
         },
-        viewerTaskLimit: fieldData.viewerTaskLimit || 3,
-        offlineThreshold: 5 * 60 * 1000,
-        defaultListName: "Viewers",
+        viewerTaskLimit: fieldData.viewerTaskLimit !== undefined && fieldData.viewerTaskLimit !== null ? fieldData.viewerTaskLimit : VIEWER_LIMIT_DEFAULT,
+        offlineThreshold: 5 * 60 * 1000, // 5 minutes, not currently configurable
+        defaultListName: "Viewers", // Internal name, not configurable
+        streamerTask1: fieldData.streamerTask1,
+        streamerTask2: fieldData.streamerTask2,
+        streamerTask3: fieldData.streamerTask3,
+        streamerTask4: fieldData.streamerTask4,
+        streamerTask5: fieldData.streamerTask5,
     };
     return config;
 }

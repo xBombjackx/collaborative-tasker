@@ -3,5 +3,6 @@ build
 npm-debug.log
 .env
 .DS_Store
-.sdk/output
+.sdk/
+*.log
 output.zip

@@ -1,26 +1,61 @@
 // widget/ui.js
+const FLASH_ANIMATION_DURATION = 700;
+let lastProgressPoints = -1;
+
+function flashTierSegment(tier) {
+    const tierSegment = document.getElementById(`tier-${tier}-segment`);
+    if (tierSegment) {
+        tierSegment.classList.add('flash');
+        setTimeout(() => tierSegment.classList.remove('flash'), FLASH_ANIMATION_DURATION);
+    }
+}
 
 function updateProgressBar(progressPoints, config) {
+    const container = document.querySelector('.progress-bar-container');
     const progressBar = document.getElementById("progress-bar");
     const progressText = document.getElementById("progress-text");
-    if (!progressBar || !progressText) return;
+    if (!container || !progressBar || !progressText) return;
 
-    const maxPoints = config.tierThresholds.tier3;
+    const { tier1, tier2, tier3 } = config.tierThresholds;
+    const maxPoints = tier3;
     const percentage = Math.min((progressPoints / maxPoints) * 100, 100);
 
     progressBar.style.width = `${percentage}%`;
     progressText.textContent = `${progressPoints}/${maxPoints}`;
 
-    // Reset classes
-    progressBar.className = "progress-bar";
+    // Set CSS variables for tier segment positions
+    container.style.setProperty('--tier1-percent', `${(tier1 / maxPoints) * 100}%`);
+    container.style.setProperty('--tier2-percent', `${(tier2 / maxPoints) * 100}%`);
+    container.style.setProperty('--tier3-percent', '100%');
 
-    // Add tier completion classes
-    if (progressPoints >= config.tierThresholds.tier3) {
+    // --- Tier Completion Visuals ---
+    if (lastProgressPoints !== -1) { // Don't run on initial load
+        // Tier 1 crossed
+        if (progressPoints >= tier1 && lastProgressPoints < tier1) {
+            flashTierSegment(1);
+            triggerConfetti();
+        }
+        // Tier 2 crossed
+        if (progressPoints >= tier2 && lastProgressPoints < tier2) {
+            flashTierSegment(2);
+            triggerConfetti();
+        }
+        // Tier 3 crossed
+        if (progressPoints >= tier3 && lastProgressPoints < tier3) {
+            flashTierSegment(3);
+            triggerConfetti();
+        }
+    }
+
+    lastProgressPoints = progressPoints;
+
+    // --- Persistent Tier Styling ---
+    progressBar.className = "progress-bar"; // Reset
+    if (progressPoints >= tier3) {
         progressBar.classList.add("tier-3-complete");
-        triggerConfetti();
-    } else if (progressPoints >= config.tierThresholds.tier2) {
+    } else if (progressPoints >= tier2) {
         progressBar.classList.add("tier-2-complete");
-    } else if (progressPoints >= config.tierThresholds.tier1) {
+    } else if (progressPoints >= tier1) {
         progressBar.classList.add("tier-1-complete");
     }
 }

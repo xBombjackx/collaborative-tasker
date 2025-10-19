@@ -375,10 +375,17 @@
     function handleManagementListClick(event) {
         const button = event.target.closest('button');
         if (!button) return;
-        const { listName, taskIndex, action } = button.dataset;
+        const { listName, taskIndex, action, username } = button.dataset;
 
-        if (action === 'complete' && widgetWindow.CST_API?.completeTaskInList) {
-            widgetWindow.CST_API.completeTaskInList(listName, parseInt(taskIndex));
+        if (action === 'complete') {
+            if (username) {
+                // Emulate a mod completing a viewer's task
+                emulateCommand(`!donetask ${username}`, 'mod');
+            } else {
+                // Fallback for streamer tasks that have no user and no command to complete them
+                console.warn(`No username for task at index ${taskIndex} in ${listName}. Using direct API call.`)
+                widgetWindow.CST_API?.completeTaskInList(listName, parseInt(taskIndex));
+            }
         } else if (action === 'delete' && widgetWindow.CST_API?.deleteTaskFromList) {
             widgetWindow.CST_API.deleteTaskFromList(listName, parseInt(taskIndex));
         }
@@ -448,9 +455,17 @@
         if (selectedList && state.lists[selectedList]) {
             state.lists[selectedList].tasks.forEach((task, index) => {
                 const li = document.createElement('li');
+
+                // Handle both viewer tasks (task.task) and streamer tasks (task.text)
+                const taskDescription = task.task || task.text;
                 const textSpan = document.createElement('span');
-                textSpan.textContent = task.text;
+                if (task.username) {
+                    textSpan.innerHTML = `<strong>${task.username}</strong>: ${taskDescription}`;
+                } else {
+                    textSpan.textContent = taskDescription;
+                }
                 li.appendChild(textSpan);
+
 
                 const actions = document.createElement('div');
                 actions.className = 'actions';
@@ -460,6 +475,10 @@
                 completeButton.dataset.action = 'complete';
                 completeButton.dataset.listName = selectedList;
                 completeButton.dataset.taskIndex = index;
+                // Add username to dataset if it exists, for the handler to use
+                if (task.username) {
+                    completeButton.dataset.username = task.username;
+                }
                 actions.appendChild(completeButton);
 
                 const deleteButton = document.createElement('button');

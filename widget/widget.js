@@ -127,27 +127,39 @@ function initializeDefaultState(config) {
     State.saveData();
 }
 function checkOfflineUsers() {
-  const config = State.getConfig();
-  const lists = State.getLists();
-  const now = Date.now();
-  let changed = false;
-  for (const listName in lists) {
-    const list = lists[listName];
-    if (list.tasks) {
-      list.tasks.forEach(task => {
-        if (task.lastSeen && task.status === "active" && now - task.lastSeen > config.offlineThreshold) {
-          task.status = "offline";
-          changed = true;
+    const config = State.getConfig();
+    const lists = State.getLists();
+    const now = Date.now();
+    const CHECK_INTERVAL = 30 * 1000; // Check each list at most every 30 seconds
+    let overallChanged = false;
+
+    for (const listName in lists) {
+        const list = lists[listName];
+        // Ensure lastChecked is a number, default to 0 if not present for older data
+        const lastChecked = list.lastChecked || 0;
+
+        if (now - lastChecked > CHECK_INTERVAL) {
+            let listChanged = false;
+            if (list.tasks) {
+                list.tasks.forEach(task => {
+                    if (task.lastSeen && task.status === "active" && now - task.lastSeen > config.offlineThreshold) {
+                        task.status = "offline";
+                        listChanged = true;
+                        overallChanged = true;
+                    }
+                });
+            }
+            if (listChanged) {
+                UI.renderList(listName, lists, config);
+            }
+            // Update the last checked time for this list regardless of changes
+            list.lastChecked = now;
         }
-      });
     }
-    if (changed) {
-      UI.renderList(listName, lists, config);
+
+    if (overallChanged) {
+        State.saveData();
     }
-  }
-  if (changed) {
-    State.saveData();
-  }
 }
 function showFeedback(message, isError = false) {
   console.log(`[FEEDBACK]${isError ? '[ERROR]' : ''}: ${message}`);

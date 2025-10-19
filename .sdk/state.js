@@ -33,13 +33,13 @@ function setConfig(fieldData) {
     const VIEWER_LIMIT_DEFAULT = 3;
 
     config = {
-        sessionSummary: fieldData.sessionSummary !== undefined && fieldData.sessionSummary !== '' ? fieldData.sessionSummary : "Session Goals",
+        sessionSummary: fieldData.sessionSummary || "Session Goals",
         tierThresholds: {
-            tier1: fieldData.tier1Threshold !== undefined && fieldData.tier1Threshold !== null ? fieldData.tier1Threshold : TIER_1_DEFAULT,
-            tier2: fieldData.tier2Threshold !== undefined && fieldData.tier2Threshold !== null ? fieldData.tier2Threshold : TIER_2_DEFAULT,
-            tier3: fieldData.tier3Threshold !== undefined && fieldData.tier3Threshold !== null ? fieldData.tier3Threshold : TIER_3_DEFAULT,
+            tier1: fieldData.tier1Threshold ?? TIER_1_DEFAULT,
+            tier2: fieldData.tier2Threshold ?? TIER_2_DEFAULT,
+            tier3: fieldData.tier3Threshold ?? TIER_3_DEFAULT,
         },
-        viewerTaskLimit: fieldData.viewerTaskLimit !== undefined && fieldData.viewerTaskLimit !== null ? fieldData.viewerTaskLimit : VIEWER_LIMIT_DEFAULT,
+        viewerTaskLimit: fieldData.viewerTaskLimit ?? VIEWER_LIMIT_DEFAULT,
         offlineThreshold: 5 * 60 * 1000, // 5 minutes, not currently configurable
         defaultListName: "Viewers", // Internal name, not configurable
         streamerTask1: fieldData.streamerTask1,
@@ -72,6 +72,7 @@ function addList(listName, summary = "") {
     lists[listName] = {
         tasks: [],
         summary: summary || listName,
+        lastChecked: 0 // Initialize timestamp for offline check optimization
     };
     saveData();
     return true;

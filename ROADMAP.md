@@ -48,7 +48,18 @@ With a stable MVP, this phase focuses on expanding the widget's feature set to c
         -   A PRS tier is reached.
         -   A community goal is completed.
 -   [ ] **Fine-Grained Permission System**
-    -   Begin planning and implementing a system (configurable in `fields.json`) to allow streamers to define who can perform specific actions (e.g., allow VIPs to bypass the moderation queue).
+    -   **Concept:** Evolve the permission system from a simple `isMod` check to a more flexible, role-based system configurable via `fields.json`. This allows streamers to grant specific permissions to different user tiers (e.g., VIPs, subscribers).
+    -   **Phase 2 Implementation Plan:**
+        1.  **Add `fields.json` Configuration:**
+            -   `permissionBypassQueue`: A text field where the streamer can list roles that can bypass the `!task` approval queue (e.g., "vip,subscriber,mod").
+            -   `permissionManageLists`: A text field for roles that can use list management commands like `!addlist` (e.g., "mod").
+            -   `permissionManageTasks`: A text field for roles that can manage tasks (`!donetask`, `!status <user>`) (e.g., "mod").
+        2.  **Create a Permission Helper:**
+            -   In a new `permissions.js` file or within `commands.js`, create a helper function: `hasPermission(userTags, requiredRolesString)`.
+            -   This function will parse the `requiredRolesString` from the config (e.g., "vip,subscriber") and check if any of these roles are present and `true` in the user's `tags` object from the event data.
+        3.  **Update Command Handlers in `commands.js`:**
+            -   Replace existing `isMod` checks with calls to the new `hasPermission` helper function. For example, in `handleViewerTask`, check `hasPermission(userRoles, config.permissionBypassQueue)` to decide whether to add the task directly to the active list or to the pending queue.
+            -   Protect commands like `!addlist` and `!donetask` with `hasPermission(userRoles, config.permissionManageLists)` and `hasPermission(userRoles, config.permissionManageTasks)` respectively.
 
 ---
 

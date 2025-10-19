@@ -1,11 +1,12 @@
 // widget/ui.js
+const FLASH_ANIMATION_DURATION = 700;
 let lastProgressPoints = -1;
 
 function flashTierSegment(tier) {
     const tierSegment = document.getElementById(`tier-${tier}-segment`);
     if (tierSegment) {
         tierSegment.classList.add('flash');
-        setTimeout(() => tierSegment.classList.remove('flash'), 700); // Duration of the animation
+        setTimeout(() => tierSegment.classList.remove('flash'), FLASH_ANIMATION_DURATION);
     }
 }
 

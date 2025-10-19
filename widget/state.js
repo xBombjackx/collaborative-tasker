@@ -72,6 +72,7 @@ function addList(listName, summary = "") {
     lists[listName] = {
         tasks: [],
         summary: summary || listName,
+        lastChecked: 0 // Initialize timestamp for offline check optimization
     };
     saveData();
     return true;

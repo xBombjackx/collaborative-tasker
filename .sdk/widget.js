@@ -92,29 +92,39 @@ function onLegacyEventReceived(e) {
   }
 }
 function initializeDefaultState(config) {
-  const defaultListName = config.defaultListName || "Viewers";
-  const defaultState = {
-    lists: {
-      "Stream Goals": {
-        tasks: [{
-          text: "Example Streamer Task 1",
-          completed: false
-        }, {
-          text: "Example Streamer Task 2",
-          completed: false
-        }],
-        summary: config.sessionSummary
-      },
-      [defaultListName]: {
-        tasks: [],
-        limit: config.viewerTaskLimit
-      }
-    },
-    pendingTasks: [],
-    progressPoints: 0
-  };
-  State.setInitialState(defaultState);
-  State.saveData();
+    const defaultListName = config.defaultListName || "Viewers";
+    const streamerListName = config.sessionSummary || "Stream Goals";
+
+    // Dynamically create streamer tasks from fieldData
+    const streamerTasks = [];
+    for (let i = 1; i <= 5; i++) {
+        const taskKey = `streamerTask${i}`;
+        const taskText = State.getConfig()[taskKey]; // Access config set from fieldData
+        if (taskText && taskText.trim() !== "") {
+            streamerTasks.push({ text: taskText, completed: false });
+        }
+    }
+
+    const defaultState = {
+        lists: {
+            // Only add the streamer list if there are tasks for it
+            ...(streamerTasks.length > 0 && {
+                [streamerListName]: {
+                    tasks: streamerTasks,
+                    summary: streamerListName
+                }
+            }),
+            [defaultListName]: {
+                tasks: [],
+                limit: config.viewerTaskLimit
+            }
+        },
+        pendingTasks: [],
+        progressPoints: 0
+    };
+
+    State.setInitialState(defaultState);
+    State.saveData();
 }
 function checkOfflineUsers() {
   const config = State.getConfig();

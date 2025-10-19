@@ -1,53 +1,18 @@
 .confetti {
-    position: fixed; /* Use fixed to cover the whole viewport */
-    width: 10px;
-    height: 10px;
-    background-color: #f00; /* This will be overridden by inline style */
-    top: -20px;
-    opacity: 0.8;
-    z-index: 9999; /* Ensure it's on top */
+  position: fixed;
+ /* Use fixed to cover the whole viewport */
+  width: 10px;
+  height: 10px;
+  background-color: #f00;
+ /* This will be overridden by inline style */
+  top: -20px;
+  opacity: 0.8;
+  z-index: 9999;
+ /* Ensure it's on top */
 }
-
-/* Tier Segment Styling */
-.tier-segment {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    border-right: 2px dashed rgba(255, 255, 255, 0.3);
-    opacity: 0.7;
-    transition: all 0.3s ease;
-    /* Default positions in case CSS variables are not set */
-    display: none;
-}
-
-#tier-1-segment { left: var(--tier1-percent, 25%); display: block; }
-#tier-2-segment { left: var(--tier2-percent, 58%); display: block; }
-#tier-3-segment { left: var(--tier3-percent, 100%); border-right: none; display: block; }
 
 .tier-segment.flash {
     background-color: rgba(255, 255, 255, 0.3);
     animation: flash-anim 0.7s ease-out;
     z-index: 1;
-}
-
-@keyframes flash-anim {
-    0% {
-        transform: scaleY(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scaleY(1.8);
-        opacity: 0.5;
-    }
-    100% {
-        transform: scaleY(1);
-        opacity: 0;
-    }
-}
-
-/* Base styling for the progress bar itself */
-.progress-bar {
-    position: relative;
-    z-index: 2; /* Make sure the bar is above the flash effect */
-    transition: width 0.5s ease-in-out;
 }

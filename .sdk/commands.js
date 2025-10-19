@@ -42,6 +42,11 @@ function handleMessage(event, showFeedback) {
                 handleAddList(args.join(" "), showFeedback);
             }
             break;
+        case "!donetask":
+            if (isMod) {
+                handleDoneTask(args[0], showFeedback);
+            }
+            break;
     }
 }
 
@@ -180,8 +185,21 @@ function handleUpdateStatus(requestor, status, targetUser, isMod, showFeedback) 
             newStatus = "active";
             feedbackMsg = `@${username}'s task has been resumed.`;
             break;
+        case "reset":
+            if (isMod && task.completed) {
+                newStatus = "active";
+                task.completed = false; // Un-complete the task
+                // Note: We are NOT decrementing progress points upon reset.
+                feedbackMsg = `@${username}'s task has been reset to active.`;
+            } else {
+                // Silently ignore or provide feedback if a non-mod tries it
+                if (!isMod) showFeedback("You do not have permission to reset tasks.");
+                else showFeedback("Only completed tasks can be reset.");
+                return; // Exit without making changes
+            }
+            break;
         default:
-            showFeedback(`Invalid status. Use 'complete', 'pause', or 'resume'.`);
+            showFeedback(`Invalid status. Use 'complete', 'pause', 'resume', or 'reset' (mods only).`);
             return;
     }
 
@@ -208,6 +226,37 @@ function handleAddList(listName, showFeedback) {
     } else {
         showFeedback(`Error: List "${listName}" already exists.`);
     }
+}
+
+function handleDoneTask(username, showFeedback) {
+    if (!username) {
+        showFeedback("Usage: !donetask <username>");
+        return;
+    }
+
+    const { task, listName } = State.findTaskByUsername(username);
+
+    if (!task) {
+        showFeedback(`No active task found for @${username}.`);
+        return;
+    }
+
+    if (task.completed) {
+        showFeedback(`@${username}'s task is already marked as complete.`);
+        return;
+    }
+
+    // Mark as complete
+    task.status = "completed";
+    task.completed = true;
+
+    // Update UI and state
+    const newProgress = State.incrementProgress();
+    UI.updateProgressBar(newProgress, State.getConfig());
+    UI.renderList(listName, State.getLists(), State.getConfig());
+    State.saveData();
+
+    showFeedback(`Task for @${username} has been marked as complete.`);
 }
 
 export {

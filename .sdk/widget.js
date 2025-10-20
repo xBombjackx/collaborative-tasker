@@ -201,7 +201,9 @@ function mockWidgetLoad() {
         tier2Threshold: 10,
         tier3Threshold: 15,
         viewerTaskLimit: 5,
-        theme: "theme-1"
+        theme: "theme-1",
+        streamerTask1: "Fix the build process",
+        streamerTask2: "Make chat feedback configurable"
       }
     }
   }));

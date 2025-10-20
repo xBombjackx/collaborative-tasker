@@ -66,21 +66,29 @@ app.get("/", function (req, res) {
 
 watcher
     .on("add", function (filePath) {
-        logger.info(`[+] ${filePath}`);
-        const fileName = path.basename(filePath);
-        if (filePath.includes("widget.html")) {
-            widgetToIndex();
-        } else if (fileName.endsWith('.js') || fileName.endsWith('.css')) {
-            fs.copyFileSync(filePath, path.join(__dirname, ".sdk", fileName));
+        try {
+            logger.info(`[+] ${filePath}`);
+            const fileName = path.basename(filePath);
+            if (filePath.includes("widget.html")) {
+                widgetToIndex();
+            } else if (fileName.endsWith('.js') || fileName.endsWith('.css')) {
+                fs.copyFileSync(filePath, path.join(__dirname, ".sdk", fileName));
+            }
+        } catch (err) {
+            logger.error(`Error processing add event for ${filePath}:`, err);
         }
     })
     .on("change", function (filePath) {
-        logger.info(`[~] ${filePath}`);
-        const fileName = path.basename(filePath);
-        if (filePath.includes("widget.html")) {
-            widgetToIndex();
-        } else if (fileName.endsWith('.js') || fileName.endsWith('.css')) {
-            fs.copyFileSync(filePath, path.join(__dirname, ".sdk", fileName));
+        try {
+            logger.info(`[~] ${filePath}`);
+            const fileName = path.basename(filePath);
+            if (filePath.includes("widget.html")) {
+                widgetToIndex();
+            } else if (fileName.endsWith('.js') || fileName.endsWith('.css')) {
+                fs.copyFileSync(filePath, path.join(__dirname, ".sdk", fileName));
+            }
+        } catch (err) {
+            logger.error(`Error processing change event for ${filePath}:`, err);
         }
     })
     .on("unlink", function (path) {
@@ -128,50 +136,43 @@ app.listen(PORT, () => {
 })
 
 function widgetToIndex() {
-    const sourceFilePath = "./widget/widget.html"
-    const targetFilePath = "./.sdk/index.html"
+    const sourceFilePath = "./widget/widget.html";
+    const targetFilePath = "./.sdk/index.html";
 
-    const getHeadElements = (html) => {
-        const $ = cheerio.load(html)
-        return $("head").html()
-    }
+    try {
+        const sourceHtml = fs.readFileSync(sourceFilePath, "utf8");
+        const targetHtml = fs.readFileSync(targetFilePath, "utf8");
 
-    const elementExists = (targetHtml, element) => {
-        const $ = cheerio.load(targetHtml)
-        return $("head").html().includes(element)
-    }
+        const getHeadElements = (html) => {
+            const $ = cheerio.load(html);
+            return $("head").html();
+        };
 
-    const appendHeadElements = (sourceHtml, targetHtml) => {
-        const sourceHead = getHeadElements(sourceHtml)
-        const targetHead = getHeadElements(targetHtml)
+        const elementExists = (targetHtml, element) => {
+            const $ = cheerio.load(targetHtml);
+            return $("head").html().includes(element);
+        };
 
-        let newHeadContent = ""
-        const $source = cheerio.load(sourceHtml)
-        const sourceHeadChildren = $source("head").children()
+        let newHeadContent = "";
+        const $source = cheerio.load(sourceHtml);
+        const sourceHeadChildren = $source("head").children();
 
         sourceHeadChildren.each((i, el) => {
-            const elementHtml = $source(el).toString()
+            const elementHtml = $source(el).toString();
             if (!elementExists(targetHtml, elementHtml)) {
-                newHeadContent += elementHtml + "\n"
+                newHeadContent += elementHtml + "\n";
             }
-        })
+        });
 
         if (newHeadContent) {
-            const $target = cheerio.load(targetHtml)
-            $target("head").append(newHeadContent + "\n")
-            fs.writeFileSync(targetFilePath, $target.html())
+            const $target = cheerio.load(targetHtml);
+            $target("head").append(newHeadContent + "\n");
+            fs.writeFileSync(targetFilePath, $target.html());
+            logger.info("Updated .sdk/index.html with new head elements.");
         }
+    } catch (err) {
+        logger.error("Error in widgetToIndex:", err);
     }
-
-    fs.readFile(sourceFilePath, "utf8", (err, sourceHtml) => {
-        if (err) throw err
-
-        fs.readFile(targetFilePath, "utf8", (err, targetHtml) => {
-            if (err) throw err
-
-            appendHeadElements(sourceHtml, targetHtml)
-        })
-    })
 }
 
 const extractDimensions = (svgContent) => {
@@ -207,52 +208,60 @@ const generateCSSClass = (filename, svgContent) => {
 }
 
 function processSVGs() {
-    const svgFolder = path.join(__dirname, "svg")
-    const cssFile = path.join(__dirname, "widget", "widget.css")
+    const svgFolder = path.join(__dirname, "svg");
+    const cssFile = path.join(__dirname, "widget", "widget.css");
 
-    fs.readdir(svgFolder, (err, files) => {
-        if (err) throw err
-
-        let cssContent = ""
+    try {
+        const files = fs.readdirSync(svgFolder);
+        let cssContent = "";
 
         files.forEach((file) => {
             if (path.extname(file).toLowerCase() === ".svg") {
-                const filePath = path.join(svgFolder, file)
-                const svgContent = fs.readFileSync(filePath, "utf8")
-                cssContent += generateCSSClass(file, svgContent) + "\n\n"
+                const filePath = path.join(svgFolder, file);
+                try {
+                    const svgContent = fs.readFileSync(filePath, "utf8");
+                    cssContent += generateCSSClass(file, svgContent) + "\n\n";
+                } catch (readErr) {
+                    logger.error(`Error reading SVG file ${file}:`, readErr);
+                }
             }
-        })
+        });
 
-        fs.readFile(cssFile, "utf8", (err, existingCSS) => {
-            let updatedCSS = ""
+        let existingCSS = "";
+        try {
+            existingCSS = fs.readFileSync(cssFile, "utf8");
+        } catch (readErr) {
+            // File might not exist, which is okay.
+        }
 
-            if (!err) {
-                const classMap = {}
-                existingCSS.split("\n\n").forEach((rule) => {
-                    const match = rule.match(/^\.([^ \{]+)\s*\{/)
-                    if (match) {
-                        classMap[match[1]] = rule
-                    }
-                })
+        let updatedCSS = "";
+        if (existingCSS) {
+            const classMap = {};
+            existingCSS.split("\n\n").forEach((rule) => {
+                const match = rule.match(/^\.([^ \{]+)\s*\{/);
+                if (match) {
+                    classMap[match[1]] = rule;
+                }
+            });
 
-                cssContent.split("\n\n").forEach((rule) => {
-                    const match = rule.match(/^\.([^ \{]+)\s*\{/)
-                    if (match) {
-                        classMap[match[1]] = rule
-                    }
-                })
-                updatedCSS = Object.values(classMap).join("\n\n")
-            } else {
-                updatedCSS = cssContent
-            }
+            cssContent.split("\n\n").forEach((rule) => {
+                const match = rule.match(/^\.([^ \{]+)\s*\{/);
+                if (match) {
+                    classMap[match[1]] = rule;
+                }
+            });
+            updatedCSS = Object.values(classMap).join("\n\n");
+        } else {
+            updatedCSS = cssContent;
+        }
 
-            updatedCSS = cssbeautify(updatedCSS, { indent: "  " })
+        updatedCSS = cssbeautify(updatedCSS, { indent: "  " });
 
-            fs.writeFile(cssFile, updatedCSS, (err) => {
-                if (err) throw err
-            })
-        })
-    })
+        fs.writeFileSync(cssFile, updatedCSS);
+        logger.info("Processed SVGs and updated widget.css");
+    } catch (err) {
+        logger.error("Error in processSVGs:", err);
+    }
 }
 
 
@@ -260,12 +269,8 @@ function parseComponents() {
     const componentsPath = path.join(__dirname, "components");
     const generatedJsPath = path.join(__dirname, "widget", "generated-components.js");
 
-    fs.readdir(componentsPath, (err, files) => {
-        if (err) {
-            logger.error("Error reading components directory:", err);
-            return;
-        }
-
+    try {
+        const files = fs.readdirSync(componentsPath);
         let allFunctionsCode = `// This file is auto-generated by sdk.js. Do not edit manually.\n\n`;
 
         files.forEach((file) => {
@@ -295,14 +300,10 @@ function parseComponents() {
                     });
 
                     $("script").remove();
-
-                    // Remove comment nodes
                     $.root().contents().filter((index, node) => node.type === "comment").remove();
 
                     const functionName = file.replace(".html", "");
                     const formattedFunctionName = `add${functionName.charAt(0).toUpperCase() + functionName.slice(1)}`;
-
-                    // Use template literals for the main HTML body
                     const mainHtml = $("body").html()?.trim() || '';
 
                     const functionBody = `
@@ -326,14 +327,11 @@ export function ${formattedFunctionName}(${variables.join(", ")}) {
             }
         });
 
-        try {
-            // Use babel to format the generated code nicely
-            const ast = babelParser.parse(allFunctionsCode, { sourceType: "module" });
-            const { code } = babelGenerator(ast, { comments: true });
-            fs.writeFileSync(generatedJsPath, code);
-            logger.info("Successfully generated components into generated-components.js");
-        } catch (writeErr) {
-            logger.error("Error writing generated-components.js:", writeErr);
-        }
-    });
+        const ast = babelParser.parse(allFunctionsCode, { sourceType: "module" });
+        const { code } = babelGenerator(ast, { comments: true });
+        fs.writeFileSync(generatedJsPath, code);
+        logger.info("Successfully generated components into generated-components.js");
+    } catch (err) {
+        logger.error("Error in parseComponents:", err);
+    }
 }

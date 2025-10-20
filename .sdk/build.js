@@ -1,57 +1,87 @@
-const fs = require("fs")
-const path = require("path")
-const pino = require("pino")
-const archiver = require("archiver")
-const zip = require("zip-a-folder")
+const fs = require("fs");
+const path = require("path");
+const pino = require("pino");
+const archiver = require("archiver");
+
 const logger = pino({
     transport: {
         target: "pino-pretty",
     },
-})
+});
 
-async function main()
-{
+async function main() {
+    const outputDir = path.join(__dirname, "..", "dist");
+    const zipPath = path.join(outputDir, "widget.zip");
 
-try {
-    if(!fs.existsSync(path.join(__dirname, "..", ".sdk", "output"))) fs.mkdirSync(path.join(__dirname, "..", ".sdk", "output"))
+    try {
+        // Ensure the output directory exists
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir, { recursive: true });
+        }
 
-    fs.copyFileSync(
-        path.join(__dirname, "..", "widget", "widget.js"),
-        path.join(__dirname, "..", ".sdk", "output", "js.txt")
-    )
-    fs.copyFileSync(
-        path.join(__dirname, "..", "widget", "widget.css"),
-        path.join(__dirname, "..", ".sdk", "output", "css.txt")
-    )
-    fs.copyFileSync(
-        path.join(__dirname, "..", "widget", "widget.html"),
-        path.join(__dirname, "..", ".sdk", "output", "html.txt")
-    )
+        // Create a file to stream archive data to.
+        const output = fs.createWriteStream(zipPath);
+        const archive = archiver("zip", {
+            zlib: { level: 9 }, // Sets the compression level.
+        });
 
-    fs.copyFileSync(
-        path.join(__dirname, "..", "widget", "data.json"),
-        path.join(__dirname, "..", ".sdk", "output", "data.txt")
-    )
+        // Listen for all archive data to be written
+        output.on("close", function () {
+            logger.info(`${archive.pointer()} total bytes`);
+            logger.info("Archiver has been finalized and the output file descriptor has closed.");
+            logger.info(`Widget bundle created successfully at: ${zipPath}`);
+        });
 
-    fs.copyFileSync(
-        path.join(__dirname, "..", "widget", "fields.json"),
-        path.join(__dirname, "..", ".sdk", "output", "fields.txt")
-    )
+        // This event is fired when the data source is drained no matter what was the data source.
+        // It is not part of this library but rather from the NodeJS Stream API.
+        // @see: https://nodejs.org/api/stream.html#stream_event_drain
+        output.on("end", function () {
+            logger.info("Data has been drained");
+        });
 
-    fs.copyFileSync(
-        path.join(__dirname, "..", ".sdk", "widget.ini"),
-        path.join(__dirname, "..", ".sdk", "output", "widget.ini")
-    )
+        // Good practice to catch warnings (ie stat failures and other non-blocking errors)
+        archive.on("warning", function (err) {
+            if (err.code === "ENOENT") {
+                logger.warn(err);
+            } else {
+                throw err;
+            }
+        });
 
-    await zip.zip(path.join(__dirname, "..", ".sdk", "output"), path.join(__dirname, "..", "output.zip"))
+        // Good practice to catch this error explicitly
+        archive.on("error", function (err) {
+            throw err;
+        });
 
+        // Pipe archive data to the file
+        archive.pipe(output);
 
-    logger.info("Files copied successfully")
-} catch (e) {
-    logger.error("Error copying files")
-    logger.error(e)
+        // Define the files to be included in the zip
+        const filesToZip = [
+            { name: "widget.html", path: path.join(__dirname, "..", "widget", "widget.html") },
+            { name: "widget.js", path: path.join(__dirname, "..", "widget", "widget.js") },
+            { name: "widget.css", path: path.join(__dirname, "..", "widget", "widget.css") },
+            { name: "themes.css", path: path.join(__dirname, "..", "widget", "themes.css") },
+            { name: "generated-components.js", path: path.join(__dirname, "..", "widget", "generated-components.js") },
+            { name: "widget.json", path: path.join(__dirname, "..", "widget", "fields.json") }, // Rename fields.json to widget.json
+        ];
+
+        // Add files to the archive
+        for (const file of filesToZip) {
+            if (fs.existsSync(file.path)) {
+                archive.file(file.path, { name: file.name });
+            } else {
+                logger.error(`File not found, skipping: ${file.path}`);
+            }
+        }
+
+        // Finalize the archive (i.e. we are done appending files but streams have to finish yet)
+        await archive.finalize();
+
+    } catch (e) {
+        logger.error("Error creating widget bundle");
+        logger.error(e);
+    }
 }
 
-}
-
-main()
+main();

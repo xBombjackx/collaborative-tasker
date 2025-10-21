@@ -153,13 +153,39 @@
 </head>
 
 <body>
-<div class="widget-container">
-    <iframe id="widget-iframe" src="/widget.html"></iframe>
+<div class="widget-container" id="widget-view-wrapper">
+    <div class="main-container theme-3" id="main-container">
+        <div id="task-lists-container">
+            <!-- Task lists will be dynamically rendered here -->
+        </div>
+        <div class="progress-reward-system p-4 rounded-xl shadow-lg mt-4 bg-quaternary/80 backdrop-blur-sm border border-white/10">
+            <h3 class="font-bold text-lg mb-2 text-primary">Progress</h3>
+            <div class="progress-bar-container bg-tertiary/50 rounded-full overflow-hidden relative">
+                <div id="tier-1-segment" class="tier-segment"></div>
+                <div id="tier-2-segment" class="tier-segment"></div>
+                <div id="tier-3-segment" class="tier-segment"></div>
+                <div class="progress-bar bg-secondary h-4 rounded-full" id="progress-bar" style="width: 0%;"></div>
+            </div>
+            <div class="progress-text text-primary/80 text-right font-mono mt-1" id="progress-text">0/12</div>
+        </div>
+    </div>
 </div>
 
 <div class="controls">
-    <a href="/widget.html" target="_blank" style="display: block; text-align: center; padding: 10px; background-color: var(--accent-color); color: var(--accent-text); border-radius: 4px; text-decoration: none; margin-bottom: 20px;">Open Widget in New Tab</a>
     <h1>CST Test Controls</h1>
+
+    <div class="control-group">
+        <h2>Theme Selector</h2>
+        <div class="form-grid">
+            <select id="theme-selector" class="full-width">
+                <option value="theme-1">Default</option>
+                <option value="theme-2">Sky</option>
+                <option value="theme-3" selected>Sunset</option>
+                <option value="theme-4">Pastel</option>
+                <option value="theme-5">Midnight</option>
+            </select>
+        </div>
+    </div>
 
     <div class="control-group">
         <h2>List Management</h2>
@@ -246,21 +272,14 @@
         <pre id="widget-state-display"></pre>
     </div>
 
-    <div class="control-group" id="floating-view-wrapper">
-        <h2>Floating Lists View</h2>
-        <div id="floating-lists-container"></div>
-    </div>
 </div>
 
 <script>
-    const iframe = document.getElementById('widget-iframe');
-    let widgetWindow;
-
     const getEl = (id) => document.getElementById(id);
 
-    iframe.onload = () => {
-        widgetWindow = iframe.contentWindow;
-        console.log("Widget Iframe Loaded.");
+    window.onload = () => {
+        console.log("Test Environment Loaded.");
+        // The widget's JS is loaded via <script> tag, so its API should be on the window object
         window.refreshInterval = setInterval(refreshUiState, 1000);
         setupEventListeners();
     };
@@ -274,11 +293,19 @@
         getEl('show-widget-state-button').addEventListener('click', showWidgetState);
         getEl('reset-all-data-button').addEventListener('click', resetAllData);
         getEl('emulate-command-button').addEventListener('click', () => emulateCommand());
+        getEl('theme-selector').addEventListener('change', changeTheme);
+
 
         // Use event delegation for dynamically created buttons
         getEl('pending-tasks-list').addEventListener('click', handlePendingListClick);
         getEl('task-management-list').addEventListener('click', handleManagementListClick);
-        getEl('floating-lists-container').addEventListener('click', handleFloatingListClick);
+    }
+
+    function changeTheme(event) {
+        const selectedTheme = event.target.value;
+        const mainContainer = getEl('main-container');
+        mainContainer.className = 'main-container'; // Reset classes
+        mainContainer.classList.add(selectedTheme);
     }
 
     function getRoleTags(role) {
@@ -295,8 +322,8 @@
             return;
         }
 
-        if (widgetWindow.CST_API && typeof widgetWindow.CST_API.emulateMessage === 'function') {
-            widgetWindow.CST_API.emulateMessage(command, username, getRoleTags(role));
+        if (window.CST_API && typeof window.CST_API.emulateMessage === 'function') {
+            window.CST_API.emulateMessage(command, username, getRoleTags(role));
         }
         if(!commandOverride) {
             getEl('command-input').value = '';
@@ -305,8 +332,8 @@
 
     function addList() {
         const input = getEl('list-name-input');
-        if (input.value && widgetWindow.CST_API?.addList) {
-            widgetWindow.CST_API.addList(input.value);
+        if (input.value && window.CST_API?.addList) {
+            window.CST_API.addList(input.value);
             input.value = '';
         }
     }
@@ -314,7 +341,7 @@
     function deleteList() {
         const select = getEl('delete-list-select');
         if (select.value && confirm(`Are you sure you want to delete the list "${select.value}"?`)) {
-            widgetWindow.CST_API?.deleteList(select.value);
+            window.CST_API?.deleteList(select.value);
         }
     }
 
@@ -325,30 +352,30 @@
             alert("Please select a list to add a task to.");
             return;
         }
-        if (taskText.value && widgetWindow.CST_API?.addTaskToList) {
-            widgetWindow.CST_API.addTaskToList(listName, taskText.value);
+        if (taskText.value && window.CST_API?.addTaskToList) {
+            window.CST_API.addTaskToList(listName, taskText.value);
             taskText.value = '';
         }
     }
 
     function setPoints() {
         const points = parseInt(getEl('progress-points-input').value, 10);
-        if (!isNaN(points) && widgetWindow.CST_API?.setProgressPoints) {
-            widgetWindow.CST_API.setProgressPoints(points);
+        if (!isNaN(points) && window.CST_API?.setProgressPoints) {
+            window.CST_API.setProgressPoints(points);
         }
     }
 
     function addPending() {
         const username = getEl('pending-user-input').value;
         const task = getEl('pending-task-input');
-        if (username && task.value && widgetWindow.CST_API?.addPendingTaskForTest) {
-            widgetWindow.CST_API.addPendingTaskForTest(username, task.value);
+        if (username && task.value && window.CST_API?.addPendingTaskForTest) {
+            window.CST_API.addPendingTaskForTest(username, task.value);
             task.value = '';
         }
     }
 
     function showWidgetState() {
-        const state = widgetWindow.CST_API?.getWidgetState();
+        const state = window.CST_API?.getWidgetState();
         if (state) {
             getEl('widget-state-display').textContent = JSON.stringify(state, null, 2);
         }
@@ -356,7 +383,7 @@
 
     function resetAllData() {
         if (confirm("Are you sure you want to reset all widget data? This cannot be undone.")) {
-            widgetWindow.CST_API?.resetAllData();
+            window.CST_API?.resetAllData();
             // Clear the state display
             getEl('widget-state-display').textContent = '';
         }
@@ -384,10 +411,10 @@
             } else {
                 // Fallback for streamer tasks that have no user and no command to complete them
                 console.warn(`No username for task at index ${taskIndex} in ${listName}. Using direct API call.`)
-                widgetWindow.CST_API?.completeTaskInList(listName, parseInt(taskIndex));
+                window.CST_API?.completeTaskInList(listName, parseInt(taskIndex));
             }
-        } else if (action === 'delete' && widgetWindow.CST_API?.deleteTaskFromList) {
-            widgetWindow.CST_API.deleteTaskFromList(listName, parseInt(taskIndex));
+        } else if (action === 'delete' && window.CST_API?.deleteTaskFromList) {
+            window.CST_API.deleteTaskFromList(listName, parseInt(taskIndex));
         }
     }
 
@@ -400,10 +427,8 @@
     }
 
     function refreshUiState() {
-        const state = widgetWindow.CST_API?.getWidgetState();
+        const state = window.CST_API?.getWidgetState();
         if (!state) return;
-
-        refreshFloatingLists(state);
 
         // Refresh pending tasks
         const pendingList = getEl('pending-tasks-list');
@@ -498,150 +523,6 @@
             });
         }
     }
-
-    function refreshFloatingLists(state) {
-        const container = getEl('floating-lists-container');
-        container.innerHTML = ''; // Clear previous state
-
-        if (!state || !state.lists || Object.keys(state.lists).length === 0) {
-             const p = document.createElement('p');
-             p.textContent = 'No lists created yet.';
-             container.appendChild(p);
-            return;
-        }
-
-        for (const listName in state.lists) {
-            const list = state.lists[listName];
-            const listEl = document.createElement('div');
-            listEl.className = 'floating-list';
-
-            const title = document.createElement('h3');
-            title.textContent = list.summary || listName;
-            listEl.appendChild(title);
-
-            const ul = document.createElement('ul');
-            if (list.tasks.length === 0) {
-                const li = document.createElement('li');
-                li.textContent = 'No tasks in this list.';
-                ul.appendChild(li);
-            } else {
-                list.tasks.forEach(task => {
-                    const li = document.createElement('li');
-
-                    let content;
-                    const strong = document.createElement('strong');
-                    const taskDescription = task.task || task.text;
-                    if (task.username) {
-                        strong.textContent = task.username;
-                        content = document.createElement('span');
-                        content.appendChild(strong);
-                        content.append(`: ${taskDescription}`);
-                    } else {
-                        content = document.createElement('span');
-                        content.textContent = taskDescription;
-                    }
-
-                    if (task.completed) {
-                        const s = document.createElement('s');
-                        s.appendChild(content);
-                        li.appendChild(s);
-                    } else {
-                        li.appendChild(content);
-                    }
-
-                    if (task.status === 'paused' || task.status === 'offline') {
-                        const em = document.createElement('em');
-                        em.textContent = ` (${task.status.charAt(0).toUpperCase() + task.status.slice(1)})`;
-                        li.appendChild(em);
-                    }
-
-                    // Add a complete button for the viewer
-                    const currentUser = getEl('command-username-input').value;
-                    if (task.username && task.username.toLowerCase() === currentUser.toLowerCase() && task.status !== 'completed') {
-                        const completeButton = document.createElement('button');
-                        completeButton.textContent = 'Complete';
-                        completeButton.dataset.action = 'complete-viewer-task';
-                        completeButton.dataset.username = task.username;
-                        li.appendChild(completeButton);
-                    }
-
-                    ul.appendChild(li);
-                });
-            }
-            listEl.appendChild(ul);
-            container.appendChild(listEl);
-        }
-    }
-
-    function handleFloatingListClick(event) {
-        const button = event.target.closest('button');
-        if (!button) return;
-        const { action, username } = button.dataset;
-
-        if (action === 'complete-viewer-task') {
-            const originalRole = getEl('command-role-select').value;
-            const originalUser = getEl('command-username-input').value;
-            getEl('command-role-select').value = 'viewer';
-            getEl('command-username-input').value = username;
-            emulateCommand(`!status complete`);
-            getEl('command-role-select').value = originalRole;
-            getEl('command-username-input').value = originalUser;
-        }
-    }
 </script>
-
-<style>
-#floating-view-wrapper {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 300px;
-    max-height: calc(100vh - 40px);
-    overflow-y: auto;
-    z-index: 1000;
-}
-.floating-list {
-    background-color: #f8fafc;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 12px;
-    margin-bottom: 16px;
-}
-.floating-list h3 {
-    margin-top: 0;
-    font-size: 1.2rem;
-    border-bottom: 1px solid #e2e8f0;
-    padding-bottom: 8px;
-    margin-bottom: 12px;
-    background-color: #eef2f7;
-    padding: 8px 12px;
-    margin: -12px -12px 12px -12px;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-}
-.floating-list ul {
-    list-style-type: none;
-    padding-left: 0;
-    margin: 0;
-}
-.floating-list li {
-    padding: 8px 4px;
-    border-bottom: 1px solid #e2e8f0;
-    background-color: #ffffff;
-}
-.floating-list li:last-child {
-    border-bottom: none;
-    border-bottom-left-radius: 6px;
-    border-bottom-right-radius: 6px;
-}
-.floating-list li s {
-    color: var(--secondary-text);
-    opacity: 0.7;
-}
-.floating-list li em {
-    color: #f59e0b; /* Amber color for status */
-    font-style: normal;
-}
-</style>
 
 </body></html>

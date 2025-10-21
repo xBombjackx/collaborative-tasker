@@ -50,7 +50,7 @@ async function main() {
 
         // Good practice to catch this error explicitly
         archive.on("error", function (err) {
-            throw err;
+            logger.error("Archiver error:", err);
         });
 
         // Pipe archive data to the file

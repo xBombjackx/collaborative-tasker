@@ -40,13 +40,22 @@ function setConfig(fieldData) {
             tier3: fieldData.tier3Threshold ?? TIER_3_DEFAULT,
         },
         viewerTaskLimit: fieldData.viewerTaskLimit ?? VIEWER_LIMIT_DEFAULT,
-        offlineThreshold: 5 * 60 * 1000, // 5 minutes, not currently configurable
+        offlineThreshold: (fieldData.offlineTimeout ?? 5) * 60 * 1000,
+        pendingTaskLimit: fieldData.pendingTaskLimit ?? 100,
         defaultListName: "Viewers", // Internal name, not configurable
         streamerTask1: fieldData.streamerTask1,
         streamerTask2: fieldData.streamerTask2,
         streamerTask3: fieldData.streamerTask3,
         streamerTask4: fieldData.streamerTask4,
         streamerTask5: fieldData.streamerTask5,
+        // Feedback messages
+        feedbackTaskSubmitted: fieldData.feedbackTaskSubmitted,
+        feedbackTaskExists: fieldData.feedbackTaskExists,
+        feedbackQueueFull: fieldData.feedbackQueueFull,
+        feedbackTaskApproved: fieldData.feedbackTaskApproved,
+        feedbackTaskRejected: fieldData.feedbackTaskRejected,
+        feedbackTaskCompleted: fieldData.feedbackTaskCompleted,
+        feedbackListFull: fieldData.feedbackListFull,
     };
     return config;
 }
@@ -114,7 +123,7 @@ function addPendingTask(username, taskText) {
     if (existingTask) {
         return { success: false, reason: "existing" };
     }
-    if (pendingTasks.length >= 100) { // Limit pending queue
+    if (pendingTasks.length >= config.pendingTaskLimit) { // Limit pending queue
         return { success: false, reason: "full" };
     }
     pendingTasks.push({ username, task: taskText, status: "pending" });
@@ -157,7 +166,17 @@ function resetAllData() {
     return true;
 }
 
-import { debouncedSaveData } from './widget.js';
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
 
 function saveData() {
     const dataToStore = {
@@ -168,6 +187,8 @@ function saveData() {
     SE_API.store.set("cst_data", dataToStore);
     console.log("Data saved:", dataToStore);
 }
+
+const debouncedSaveData = debounce(saveData, 500);
 
 function loadData() {
     return SE_API.store.get("cst_data");
@@ -195,4 +216,5 @@ export {
     resetAllData,
     saveData,
     loadData,
+    debouncedSaveData,
 };

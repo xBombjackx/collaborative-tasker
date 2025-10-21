@@ -1,7 +1,6 @@
 // widget/commands.js
 import * as State from './state.js';
 import * as UI from './ui.js';
-import { debouncedSaveData } from './widget.js';
 
 function handleMessage(event, showFeedback) {
     const message = event.data.text.trim();
@@ -61,7 +60,7 @@ function updateUserLastSeen(username) {
         if (task.status === "offline") {
             task.status = "active";
             UI.renderList(listName, State.getLists(), State.getConfig());
-            debouncedSaveData();
+            State.debouncedSaveData();
         }
     }
 }
@@ -84,6 +83,15 @@ function handleAddTask(adder, listName, taskText, showFeedback) {
     }
 }
 
+function getFeedback(key, placeholders = {}) {
+    const config = State.getConfig();
+    let message = config[key] || `Missing feedback message for key: ${key}`;
+    for (const placeholder in placeholders) {
+        message = message.replace(new RegExp(`{${placeholder}}`, 'g'), placeholders[placeholder]);
+    }
+    return message;
+}
+
 function handleViewerTask(username, taskText, showFeedback) {
     if (!taskText) {
         showFeedback(`@${username}, please provide a task. Usage: !task <YourTaskDescription>`);
@@ -91,12 +99,12 @@ function handleViewerTask(username, taskText, showFeedback) {
     }
     const result = State.addPendingTask(username, taskText);
     if (result.success) {
-        showFeedback(`@${username}, your task has been submitted for approval!`);
+        showFeedback(getFeedback("feedbackTaskSubmitted", { username }));
     } else {
         if (result.reason === 'existing') {
-            showFeedback(`@${username}, you already have a pending or active task.`);
+            showFeedback(getFeedback("feedbackTaskExists", { username }));
         } else {
-            showFeedback(`@${username}, the submission queue is full. Please try again later.`);
+            showFeedback(getFeedback("feedbackQueueFull", { username }));
         }
     }
 }
@@ -123,7 +131,7 @@ function handleApprove(username, showFeedback) {
     }
 
     if (targetList.tasks.length >= (targetList.limit || config.viewerTaskLimit)) {
-        showFeedback(`The task list for "${targetListName}" is full. @${username}'s task cannot be approved right now.`);
+        showFeedback(getFeedback("feedbackListFull", { listName: targetListName, username }));
         return;
     }
 
@@ -134,7 +142,7 @@ function handleApprove(username, showFeedback) {
     });
 
     UI.renderList(targetListName, State.getLists(), State.getConfig());
-    showFeedback(`@${username}'s task has been approved and added to the list!`);
+    showFeedback(getFeedback("feedbackTaskApproved", { username }));
 }
 
 function handleReject(username, showFeedback) {
@@ -143,7 +151,7 @@ function handleReject(username, showFeedback) {
         return;
     }
     if (State.removePendingTask(username)) {
-        showFeedback(`@${username}'s task has been rejected.`);
+        showFeedback(getFeedback("feedbackTaskRejected", { username }));
     } else {
         showFeedback(`No pending task found for @${username}.`);
     }
@@ -176,7 +184,7 @@ function handleUpdateStatus(requestor, status, targetUser, isMod, showFeedback) 
             task.completed = true; // Set the completed flag
             const newProgress = State.incrementProgress();
             UI.updateProgressBar(newProgress, State.getConfig());
-            feedbackMsg = `@${username}'s task is now complete! Great job!`;
+            feedbackMsg = getFeedback("feedbackTaskCompleted", { username });
             break;
         case "pause":
             newStatus = "paused";
@@ -205,7 +213,7 @@ function handleUpdateStatus(requestor, status, targetUser, isMod, showFeedback) 
     }
 
     task.status = newStatus;
-    debouncedSaveData();
+    State.debouncedSaveData();
     UI.renderList(listName, State.getLists(), State.getConfig());
     showFeedback(feedbackMsg);
 }
@@ -255,7 +263,7 @@ function handleDoneTask(username, showFeedback) {
     const newProgress = State.incrementProgress();
     UI.updateProgressBar(newProgress, State.getConfig());
     UI.renderList(listName, State.getLists(), State.getConfig());
-    debouncedSaveData();
+    State.debouncedSaveData();
 
     showFeedback(`Task for @${username} has been marked as complete.`);
 }

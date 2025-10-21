@@ -16,3 +16,40 @@
     animation: flash-anim 0.7s ease-out;
     z-index: 1;
 }
+
+.task-item:last-child {
+  border-bottom: none;
+}
+
+.theme-swatch {
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    border-radius: 9999px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    transition: transform 0.2s ease-in-out;
+}
+
+.theme-swatch:hover {
+    transform: scale(1.1);
+}
+
+.theme-swatch.theme-1 {
+    background-color: #385170;
+}
+
+.theme-swatch.theme-2 {
+    background-color: #53a8b6;
+}
+
+.theme-swatch.theme-3 {
+    background-color: #ff6f3c;
+}
+
+.theme-swatch.theme-4 {
+    background-color: #fdffcd;
+}
+
+.theme-swatch.theme-5 {
+    background-color: #ffb5b5;
+}

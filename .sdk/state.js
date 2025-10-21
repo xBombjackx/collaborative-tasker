@@ -4,9 +4,19 @@
 let lists = {};
 let pendingTasks = [];
 let progressPoints = 0;
+let theme = "theme-3"; // Default theme
 
 // Configurable settings from SE Fields
 let config = {};
+
+function getTheme() {
+    return theme;
+}
+
+function setTheme(newTheme) {
+    theme = newTheme;
+    debouncedSaveData();
+}
 
 function getLists() {
     return lists;
@@ -20,10 +30,26 @@ function getProgressPoints() {
     return progressPoints;
 }
 
+function getCompletedTaskCount() {
+    let count = 0;
+    for (const listName in lists) {
+        const list = lists[listName];
+        if (list.tasks) {
+            for (const task of list.tasks) {
+                if (task.completed) {
+                    count++;
+                }
+            }
+        }
+    }
+    return count;
+}
+
 function setInitialState(initialData) {
     lists = initialData.lists || {};
     pendingTasks = initialData.pendingTasks || [];
     progressPoints = initialData.progressPoints || 0;
+    theme = initialData.theme || "theme-3"; // Default to theme-3 if not set
 }
 
 function setConfig(fieldData) {
@@ -189,6 +215,7 @@ function saveData() {
         lists,
         pendingTasks,
         progressPoints,
+        theme,
     };
     SE_API.store.set("cst_data", dataToStore);
     console.log("Data saved:", dataToStore);
@@ -205,8 +232,11 @@ export {
     getLists,
     getPendingTasks,
     getProgressPoints,
+    getCompletedTaskCount, // Export getCompletedTaskCount
+    getTheme, // Export getTheme
     setInitialState,
     setConfig,
+    setTheme, // Export setTheme
     getConfig,
     findTaskByUsername,
     addList,

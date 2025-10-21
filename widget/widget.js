@@ -19,7 +19,7 @@ if (typeof window.SE_API === "undefined") {
   };
 }
 import * as State from './state.js';
-import * as UI from './ui.js';
+import * as UI from './ui.js';;
 import { handleMessage } from './commands.js';
 import { addAlert, addMessage } from './generated-components.js';
 
@@ -61,20 +61,8 @@ function onWidgetLoad(obj) {
   // --- Configuration Loading ---
   const config = State.setConfig(fieldData);
 
-  // --- Apply Theme ---
-  UI.applyTheme(fieldData.theme || "theme-1");
-
-  // --- Theme Selector ---
-  const themeSelect = document.getElementById("theme-select");
-  if (themeSelect) {
-    themeSelect.value = fieldData.theme || "theme-1";
-    themeSelect.addEventListener("change", (event) => {
-      const newTheme = event.target.value;
-      fieldData.theme = newTheme;
-      UI.applyTheme(newTheme);
-      SE_API.store.set("collaborative-tasker-data", { ...State.getRawState(), fieldData });
-    });
-  }
+  // --- Initialize Theme Selector ---
+  UI.initThemeSelector();
 
   // --- Data Loading ---
   State.loadData().then(data => {
@@ -85,8 +73,9 @@ function onWidgetLoad(obj) {
       initializeDefaultState(config);
     }
     // --- Initial Render ---
+    UI.applyTheme(); // Apply the loaded theme
     UI.renderAllLists(State.getLists(), config);
-    UI.updateProgressBar(State.getProgressPoints(), config);
+    UI.updateProgressBar(config);
   });
 
   // Start the periodic check for offline users

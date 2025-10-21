@@ -57,13 +57,16 @@
         "type": "number",
         "label": "Active Viewer Task Limit",
         "value": 3,
-        "group": "Progress & Limits"
+        "group": "Progress & Limits",
+        "min": 1,
+        "max": 10
     },
     "offlineTimeout": {
         "type": "number",
         "label": "Offline Status Timeout (minutes)",
         "value": 5,
-        "group": "Progress & Limits"
+        "group": "Progress & Limits",
+        "description": "After how many minutes of the stream being offline should the widget clear its state. Set to 0 to disable."
     },
     "pendingTaskLimit": {
         "type": "number",

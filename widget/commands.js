@@ -198,7 +198,9 @@ function handleUpdateStatus(requestor, status, targetUser, isMod, showFeedback) 
             if (isMod && task.completed) {
                 newStatus = "active";
                 task.completed = false; // Un-complete the task
-                // Note: We are NOT decrementing progress points upon reset.
+                // Decrement progress points when a completed task is reset
+                const newProgress = State.decrementProgress();
+                UI.updateProgressBar(newProgress, State.getConfig());
                 feedbackMsg = `@${username}'s task has been reset to active.`;
             } else {
                 // Silently ignore or provide feedback if a non-mod tries it

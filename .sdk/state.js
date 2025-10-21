@@ -151,6 +151,12 @@ function incrementProgress() {
     return progressPoints;
 }
 
+function decrementProgress() {
+    progressPoints = Math.max(0, progressPoints - 1);
+    debouncedSaveData();
+    return progressPoints;
+}
+
 function setProgress(points) {
     progressPoints = points;
     debouncedSaveData();
@@ -212,6 +218,7 @@ export {
     findPendingTask,
     removePendingTask,
     incrementProgress,
+    decrementProgress,
     setProgress,
     resetAllData,
     saveData,

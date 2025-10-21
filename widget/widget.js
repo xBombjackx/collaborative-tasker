@@ -231,6 +231,23 @@ window.CST_API = {
       UI.renderList(listName, State.getLists(), State.getConfig());
     }
   },
+  toggleTaskComplete: (listName, taskIndex) => {
+    const list = State.getLists()[listName];
+    const task = list?.tasks[taskIndex];
+    if (task) {
+      const wasCompleted = task.completed;
+      task.completed = !wasCompleted;
+      task.status = task.completed ? "completed" : "active";
+
+      // Update progress points
+      const newProgress = wasCompleted ? State.decrementProgress() : State.incrementProgress();
+
+      // Re-render the UI
+      UI.renderList(listName, State.getLists(), State.getConfig());
+      UI.updateProgressBar(newProgress, State.getConfig());
+      debouncedSaveData();
+    }
+  },
   completeTaskInList: (listName, taskIndex) => {
     const task = State.getLists()[listName]?.tasks[taskIndex];
     if (task && !task.completed) {

@@ -105,6 +105,24 @@ function renderAllLists(lists, config) {
             listContainer.appendChild(ul);
 
             container.appendChild(listContainer);
+
+            // Add event listener for checkbox toggles via event delegation
+            listContainer.addEventListener('change', e => {
+                if (e.target.matches('.task-checkbox')) {
+                    const listItem = e.target.closest('.task-item');
+                    const listContainer = e.target.closest('.task-list-container');
+                    if (listItem && listContainer) {
+                        const listName = listContainer.dataset.listName;
+                        const taskIndex = parseInt(listItem.dataset.taskIndex, 10);
+                        if (listName && !isNaN(taskIndex)) {
+                            // Call a global API function to handle the state change
+                            if (window.CST_API && typeof window.CST_API.toggleTaskComplete === 'function') {
+                                window.CST_API.toggleTaskComplete(listName, taskIndex);
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         renderList(listName, lists, config);
@@ -152,11 +170,21 @@ function createListItem(task, index) {
 }
 
 function updateListItemContent(li, task) {
+    let checkbox = li.querySelector('.task-checkbox');
+    if (!checkbox) {
+        checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'task-checkbox';
+        li.prepend(checkbox); // Add checkbox at the beginning of the li
+    }
+    checkbox.checked = !!task.completed;
+
     let taskTextSpan = li.querySelector('.task-text');
     if (!taskTextSpan) {
         taskTextSpan = document.createElement('span');
         taskTextSpan.className = 'task-text';
-        li.appendChild(taskTextSpan);
+        // Insert after the checkbox
+        checkbox.insertAdjacentElement('afterend', taskTextSpan);
     }
     const newText = task.text || task.task;
     if (taskTextSpan.textContent !== newText) {

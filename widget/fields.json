@@ -87,43 +87,43 @@
     "feedbackTaskSubmitted": {
         "type": "text",
         "label": "Task Submitted",
-        "value": "@{username}, your task has been submitted for approval!",
+        "value": "@ {username}, your task has been submitted for approval!",
         "group": "Chat Messages"
     },
     "feedbackTaskExists": {
         "type": "text",
         "label": "Task Exists",
-        "value": "@{username}, you already have a pending or active task.",
+        "value": "@ {username}, you already have a pending or active task.",
         "group": "Chat Messages"
     },
     "feedbackQueueFull": {
         "type": "text",
         "label": "Queue Full",
-        "value": "@{username}, the submission queue is full. Please try again later.",
+        "value": "@ {username}, the submission queue is full. Please try again later.",
         "group": "Chat Messages"
     },
     "feedbackTaskApproved": {
         "type": "text",
         "label": "Task Approved",
-        "value": "@{username}'s task has been approved and added to the list!",
+        "value": "@ {username}'s task has been approved and added to the list!",
         "group": "Chat Messages"
     },
     "feedbackTaskRejected": {
         "type": "text",
         "label": "Task Rejected",
-        "value": "@{username}'s task has been rejected.",
+        "value": "@ {username}'s task has been rejected.",
         "group": "Chat Messages"
     },
     "feedbackTaskCompleted": {
         "type": "text",
         "label": "Task Completed",
-        "value": "@{username}'s task is now complete! Great job!",
+        "value": "@ {username}'s task is now complete! Great job!",
         "group": "Chat Messages"
     },
     "feedbackListFull": {
         "type": "text",
         "label": "List Full",
-        "value": "The task list for \"{listName}\" is full. @{username}'s task cannot be approved right now.",
+        "value": "The task list for \"{listName}\" is full. @ {username}'s task cannot be approved right now.",
         "group": "Chat Messages"
     }
 }

@@ -44,7 +44,7 @@ async function main() {
             if (err.code === "ENOENT") {
                 logger.warn(err);
             } else {
-                throw err;
+                logger.error("Archiver warning:", err);
             }
         });
 
